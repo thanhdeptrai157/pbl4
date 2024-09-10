@@ -5,6 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import com.google.gson.Gson;
+
+
 public class SendData {
     
 
@@ -22,45 +25,37 @@ public class SendData {
     }
     
     public void Send(byte[] buffer){
+        System.out.println("Gui packet");
         try {
-            DatagramPacket Packet = new DatagramPacket(buffer, buffer.length, inetAddress, port);
-            socket.send(Packet);
-            System.out.println("Gui packet");
+            
+            InfoPacket info = getInfor(buffer); 
+
+            Gson gson = new Gson();
+            byte[] bytes = gson.toJson(info).getBytes();
+            ACK.Send(bytes, inetAddress, port);
+
+            for(int i = 0; i < info.getCount(); ++i){
+                byte[] bytesImage = new byte[info.getSizeElementPacket()];
+                int size = Math.min(info.getSizeElementPacket(), buffer.length - (i) * info.getSizeElementPacket());
+                System.arraycopy(buffer, i*info.getSizeElementPacket(), bytesImage, 0, size);
+                ImageData imageData = new ImageData(i, bytesImage);
+                byte[] send = gson.toJson(imageData).getBytes();
+                ACK.Send(send, inetAddress, port);
+
+            }
+
+            System.out.println(info.toString());
         } catch (Exception e) {
-            //TODO: handle exception
+            System.err.println("Send: " + e);
         }
     }
 
 
-    public static void ack(DatagramSocket socket, DatagramPacket packet) throws IOException {
+    
+    public static InfoPacket getInfor(byte[] bytes){
+        int sizePacket = 4096;
 
-        boolean acknowledged = false;
-        int attempts = 0;
-        int maxAttempts = 10;
-        int timeout = 2000; // 2 seconds
-        
-        while (!acknowledged) {
-            socket.send(packet);
-            System.out.println("Packet sent. Awaiting acknowledgment...");
-
-            // Set socket timeout
-            socket.setSoTimeout(timeout);
-            
-            try {
-                byte[] ackBuffer = new byte[1024];
-                DatagramPacket ackPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
-                socket.receive(ackPacket);
-                String ackMessage = new String(ackPacket.getData(), 0, ackPacket.getLength(), java.nio.charset.StandardCharsets.UTF_8);
-
-                if ("ACK".equals(ackMessage)) {
-                    acknowledged = true;
-                    System.out.println("Acknowledgment received.");
-                }
-            } catch (Exception e) {
-                attempts++;
-                System.out.println("No acknowledgment received. Retrying... (" + attempts + ")");
-            }
-        }
-		
-	}
+        InfoPacket info = new InfoPacket((short)2, (short)(bytes.length / sizePacket + 1), (short)sizePacket);
+        return info;
+    }
 }

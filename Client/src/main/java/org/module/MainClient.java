@@ -31,28 +31,46 @@ import com.google.gson.Gson;
 public class MainClient {
 
 	public static void main(String[] args) throws AWTException, InterruptedException {
-        String imagePath = "/home/giapwibu/wallpaper/frieren10.jpg";
+        String imagePath = "/home/giapwibu/wallpaper/frieren2.jpg";
+        String imagePath1 = "/home/giapwibu/wallpaper/frieren3.jpg";
+        byte[] imageInBytes = null;
+        byte[] imageInBytes1 = null;
 
         try {
             BufferedImage bufferedImage = ImageIO.read(new File(imagePath));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(bufferedImage, "jpg", baos);
-
+            
             baos.flush();
 
-            byte[] imageInBytes = baos.toByteArray();
+            imageInBytes = baos.toByteArray();
             baos.close();
+            BufferedImage bufferedImage1 = ImageIO.read(new File(imagePath1));
+            ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+            ImageIO.write(bufferedImage1, "jpg", baos1);
+            
+            baos1.flush();
+
+            imageInBytes1 = baos1.toByteArray();
+            baos1.close();
         } catch (Exception e) {
         }
+        
+        int time = 30 * 10;
 
         SendData sendData = new SendData("localhost", 5000);
+        for(int i = 0; i < time; ++i){
+            System.out.println("gui thong diep");
+            if(i % 2 == 0)
+                sendData.Send(imageInBytes1);
+            else 
+                sendData.Send(imageInBytes);
 
-        InfoPacket info = new InfoPacket((short)2, (short)2, (short)10);
-        Gson gson = new Gson();
-        System.out.println("Json: " +gson.toJson(info).toString());
-        System.out.println("Json: " + new String(gson.toJson(info).getBytes()));
-        sendData.Send(gson.toJson(info).getBytes());
-        InfoPacket inf = gson.fromJson(new String(gson.toJson(info).getBytes()), InfoPacket.class); 
-        System.out.println(inf.toString());
+            System.out.println(imageInBytes.length);
+            Thread.sleep(30);
+        }
+
+
     }
+
 }

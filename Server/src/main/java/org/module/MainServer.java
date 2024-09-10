@@ -1,7 +1,9 @@
 package org.module;
 
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,28 +35,36 @@ public class MainServer {
     public static byte[] imageBytes = null ;
     public static void main(String[] args) throws InterruptedIOException{
 
+        UI();
+
+        Thread thread = new Thread( () -> {
+
         ReceivePacket receive = new ReceivePacket(5000);
-        Gson gson = new Gson();
-        String s1 = new String(receive.Receive(), StandardCharsets.UTF_8);  
-        String s = "{\"id\":2,\"count\":2,\"sizeElementPacket\":10}";
-        if(s1.equals(s))
-            System.out.println("Giong nhau");
-        else
-            System.out.println("Khac nhau");
-        System.out.println(s + " size" + s.length() );
-        System.out.println(s1 + " size" + s.length() );
+            for(int i = 0; i < 3000; ++i){
 
-        JsonReader reader = new JsonReader(new StringReader(s1));
-        reader.setLenient(true); // Enable lenient mode
+                byte[] bytes = receive.Receive();
 
-        try {
-            InfoPacket info = gson.fromJson(reader, InfoPacket.class);
+                BufferedImage image = null;
+                try {
+                    ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+                    image = ImageIO.read(bis);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-            System.out.println(info.toString());
-        } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-        }
+                label = new JLabel();
+                frame.add(label);
+                // Nếu ảnh không null, chuyển thành ImageIcon
+                if (image != null) {
+                    ImageIcon imageIcon = new ImageIcon(image);
+                    frame.remove(label);
+                    label = new JLabel(imageIcon);
+                    frame.add(label);
 
+                }
+            }
+        });
+        thread.start();
     }
 
     public static void UI(){
@@ -65,12 +76,7 @@ public class MainServer {
         // Thiết lập frame hiển thị ở giữa màn hình
         frame.setLocationRelativeTo(null);
 
-        // Hiển thị JFrame
-        Thread thread1 = new Thread(() -> {
-        });
-        thread1.start();
-        label = new JLabel();
-        frame.add(label);
+        
         frame.setVisible(true);
 
     }
