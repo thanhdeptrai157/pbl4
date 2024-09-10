@@ -31,8 +31,8 @@ import com.google.gson.Gson;
 public class MainClient {
 
 	public static void main(String[] args) throws AWTException, InterruptedException {
-        String imagePath = "/home/giapwibu/wallpaper/frieren2.jpg";
-        String imagePath1 = "/home/giapwibu/wallpaper/frieren3.jpg";
+        String imagePath = "D:\\Video Android\\anh1.jpg";
+        String imagePath1 = "D:\\Video Android\\anh.jpg";
         byte[] imageInBytes = null;
         byte[] imageInBytes1 = null;
 
@@ -58,7 +58,7 @@ public class MainClient {
         
         int time = 30 * 10;
 
-        SendData sendData = new SendData("localhost", 5000);
+        SendData sendData = new SendData("10.10.36.104", 5000);
         for(int i = 0; i < time; ++i){
             System.out.println("gui thong diep");
             if(i % 2 == 0)
