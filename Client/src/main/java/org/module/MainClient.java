@@ -37,34 +37,26 @@ public class MainClient {
         byte[] imageInBytes1 = null;
 
         try {
-            BufferedImage bufferedImage = ImageIO.read(new File(imagePath));
+            Robot robot = new Robot();
+            Rectangle rect = new Rectangle(0, 0, 1200, 600);
+
+            BufferedImage screenShot = robot.createScreenCapture(rect);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(bufferedImage, "jpg", baos);
-            
-            baos.flush();
+            ImageIO.write(screenShot, "jpg", baos); //
 
             imageInBytes = baos.toByteArray();
-            baos.close();
-            BufferedImage bufferedImage1 = ImageIO.read(new File(imagePath1));
-            ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
-            ImageIO.write(bufferedImage1, "jpg", baos1);
-            
-            baos1.flush();
 
-            imageInBytes1 = baos1.toByteArray();
-            baos1.close();
+            baos.close();
         } catch (Exception e) {
         }
         
         int time = 30 * 10;
 
-        SendData sendData = new SendData("10.10.36.104", 5000);
+        SendData sendData = new SendData("10.10.36.41", 5000);
+      //  SendData sendData = new SendData("localhost", 5000);
         for(int i = 0; i < time; ++i){
             System.out.println("gui thong diep");
-            if(i % 2 == 0)
-                sendData.Send(imageInBytes1);
-            else 
-                sendData.Send(imageInBytes);
+            sendData.Send(imageInBytes);
 
             System.out.println(imageInBytes.length);
             Thread.sleep(30);
