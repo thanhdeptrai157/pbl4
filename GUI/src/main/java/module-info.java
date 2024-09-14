@@ -9,7 +9,7 @@ module com.example.gui {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
-    
-    opens com.example.gui to javafx.fxml;
-    exports com.example.gui;
+    requires Server;
+    opens UserInterface to javafx.fxml;
+    exports UserInterface;
 }

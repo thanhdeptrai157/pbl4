@@ -4,30 +4,15 @@ import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 import javax.imageio.ImageIO;
 
-import org.Network.InfoPacket;
+import UserInterface.ClientUi;
+import UserInterface.ServerUI;
 import org.Network.SendData;
 
-import com.google.gson.Gson;
-import com.example.gui.HelloApplication;
+import UserInterface.HelloApplication;
 public class MainClient {
 
 	public static void main(String[] args) throws AWTException, InterruptedException {
@@ -35,7 +20,6 @@ public class MainClient {
         String imagePath1 = "D:\\Video Android\\anh.jpg";
         byte[] imageInBytes = null;
         byte[] imageInBytes1 = null;
-        HelloApplication.launchUI(args);
         try {
             Robot robot = new Robot();
             Rectangle rect = new Rectangle(0, 0, 1200, 600);
@@ -61,8 +45,6 @@ public class MainClient {
             System.out.println(imageInBytes.length);
             Thread.sleep(30);
         }
-
-
     }
 
 }

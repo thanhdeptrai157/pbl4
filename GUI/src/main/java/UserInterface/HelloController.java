@@ -1,4 +1,4 @@
-package com.example.gui;
+package UserInterface;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -20,4 +20,6 @@ public class HelloController {
         inputName.getText();
         welcomeText.setText(inputName.getText());
     }
+
+
 }
