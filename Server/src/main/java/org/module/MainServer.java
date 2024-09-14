@@ -66,7 +66,7 @@ public class MainServer {
         ImageIcon imageIcon = new ImageIcon(image);
         label = new JLabel(imageIcon);
         frame.add(label);
-        frame.revalidate();
-       frame.repaint();
+        frame.revalidate(); // kiểm tra sự thay đổi của các thành phần con và tính toán lại kích thước để vẽ lại
+       frame.repaint(); // vẽ lại toàn bộ container và thành phần con => hiển thị ngay lập tức
     }
 }
