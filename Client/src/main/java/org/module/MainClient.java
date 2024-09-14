@@ -53,7 +53,7 @@ public class MainClient {
 
                 baos.close();
             } catch (Exception e) {
-                System.out.println("Lỗi từ MainClient  : " + e.getMessage());
+                System.out.println("Error MainClient  : " + e.getMessage());
 
             }
 

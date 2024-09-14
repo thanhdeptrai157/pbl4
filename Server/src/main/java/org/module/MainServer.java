@@ -28,8 +28,8 @@ public class MainServer {
                     try {
                         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
                         image = ImageIO.read(bis);
-                    } catch (IOException e) {
-                        System.out.println("Lỗi từ MainServer: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error MainServer: " + e.getMessage());
                     }
 
                     // Xóa ảnh cũ và cập nhật ảnh mới
