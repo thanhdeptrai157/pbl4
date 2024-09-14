@@ -30,37 +30,54 @@ import com.google.gson.Gson;
 
 public class MainClient {
 
-	public static void main(String[] args) throws AWTException, InterruptedException {
-        String imagePath = "D:\\Video Android\\anh1.jpg";
-        String imagePath1 = "D:\\Video Android\\anh.jpg";
+    public static void main(String[] args) throws AWTException, InterruptedException {
+//        String imagePath = "D:\\Video Android\\anh1.jpg";
+//        String imagePath1 = "D:\\Video Android\\anh.jpg";
+
         byte[] imageInBytes = null;
-        byte[] imageInBytes1 = null;
+        //byte[] imageInBytes1 = null;
 
-        try {
-            Robot robot = new Robot();
-            Rectangle rect = new Rectangle(0, 0, 1200, 600);
+        Robot robot = new Robot();
+        Rectangle rect = new Rectangle(0, 0, 1200, 600);
+        SendData sendData = new SendData("10.10.2.84", 5000);
 
-            BufferedImage screenShot = robot.createScreenCapture(rect);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(screenShot, "jpg", baos); //
+        while (true) {
+            try {
 
-            imageInBytes = baos.toByteArray();
 
-            baos.close();
-        } catch (Exception e) {
-        }
-        
-        int time = 30 * 10;
+                BufferedImage screenShot = robot.createScreenCapture(rect);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ImageIO.write(screenShot, "jpg", baos); //
 
-        SendData sendData = new SendData("10.10.36.41", 5000);
-      //  SendData sendData = new SendData("localhost", 5000);
-        for(int i = 0; i < time; ++i){
-            System.out.println("gui thong diep");
+                imageInBytes = baos.toByteArray();
+
+                baos.close();
+            } catch (Exception e) {
+                System.out.println("Lỗi từ MainClient  : " + e.getMessage());
+
+            }
+
+//            int time = 30 * 10;
+//
+//
+//            //  SendData sendData = new SendData("localhost", 5000);
+//            for (int i = 0; i < time; ++i) {
+//                System.out.println("gui thong diep");
+//                sendData.Send(imageInBytes);
+//
+//                System.out.println(imageInBytes.length);
+//                Thread.sleep(30);
+//            }
+
+            System.out.println("gui hinh anh : ");
             sendData.Send(imageInBytes);
 
             System.out.println(imageInBytes.length);
-            Thread.sleep(30);
+              Thread.sleep(1000);
+
+
         }
+
 
 
     }
