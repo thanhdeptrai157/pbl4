@@ -35,7 +35,7 @@ public class MainServer {
                     // Xóa ảnh cũ và cập nhật ảnh mới
                     if (image != null) {
                         updateImage(image);
-                        Thread.sleep(2000); // Hiển thị ảnh trong 2 giây
+                        Thread.sleep(500); // Hiển thị ảnh trong 2 giây
                     }
 
                 } catch (InterruptedException e) {
