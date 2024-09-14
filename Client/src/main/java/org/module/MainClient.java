@@ -39,7 +39,7 @@ public class MainClient {
 
         Robot robot = new Robot();
         Rectangle rect = new Rectangle(0, 0, 1200, 600);
-        SendData sendData = new SendData("10.10.0.238", 5000);
+        SendData sendData = new SendData("localhost", 5000);
 
         while (true) {
             try {
