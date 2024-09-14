@@ -27,7 +27,7 @@ import org.Network.InfoPacket;
 import org.Network.SendData;
 
 import com.google.gson.Gson;
-
+import com.example.gui.HelloApplication;
 public class MainClient {
 
 	public static void main(String[] args) throws AWTException, InterruptedException {
@@ -35,7 +35,7 @@ public class MainClient {
         String imagePath1 = "D:\\Video Android\\anh.jpg";
         byte[] imageInBytes = null;
         byte[] imageInBytes1 = null;
-
+        HelloApplication.launchUI(args);
         try {
             Robot robot = new Robot();
             Rectangle rect = new Rectangle(0, 0, 1200, 600);
