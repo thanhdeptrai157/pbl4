@@ -13,10 +13,10 @@ import com.google.gson.stream.JsonReader;
 
 public class ACK {
     
-    public static void Send(byte[] bytes, InetAddress inetAddress, int port){
+    public static void Send(byte[] bytes, Class<?> classT, InetAddress inetAddress, int port){
         int id = new Random().nextInt();
 
-        ACKData ackData = new ACKData(id, bytes);
+        ACKData ackData = new ACKData(id, classT, bytes);
         byte[] ackBytes = new Gson().toJson(ackData).getBytes();
 
         boolean acknowledged = false;
@@ -52,7 +52,7 @@ public class ACK {
         }
     }
 
-    public static byte[] Receive(int port){
+    public static ACKData Receive(int port){
         ACKData ackData = null;
         try {
             DatagramSocket socket = new DatagramSocket(port); 
@@ -81,7 +81,7 @@ public class ACK {
         } catch (Exception e) { 
             System.err.println("Loi khi nhan ack "+e); 
         } 
-        if(ackData != null) return ackData.getData(); 
+        if(ackData != null) return ackData; 
         return null; 
     } 
 }

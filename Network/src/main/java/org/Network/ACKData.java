@@ -1,14 +1,16 @@
 package org.Network;
 
 public class ACKData {
-    private int id;
+    private int id; // dung de xac nhan goi tin
+    private Class<?> classT; 
     private byte[] data;
 
-    public ACKData(int id, byte[] data){
+    public ACKData(int id, Class<?> classT, byte[] data){
         this.id = id;
+        this.classT = classT;
         this.data = data;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
@@ -20,5 +22,11 @@ public class ACKData {
     }
     public byte[] getData() {
         return data;
+    }
+    public void setClassT(Class<?> classT) {
+        this.classT = classT;
+    }
+    public Class<?> getClassT() {
+        return classT;
     }
 }
