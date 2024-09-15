@@ -4,13 +4,21 @@ public class InfoPacket {
     private short id;
     private short count;
     private short sizeElementPacket;
+    private int ipAddress;
 
-    public  InfoPacket(short id, short count, short sizeElementpacket){
+    public  InfoPacket(int ipAddress, short id, short count, short sizeElementpacket){
+        this.ipAddress = ipAddress;
         this.id = id;
         this.count = count;
         this.sizeElementPacket = sizeElementpacket;
     }
 
+    public void setIpAddress(int ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+    public int getIpAddress() {
+        return ipAddress;
+    }
     public void setId(short id) {
         this.id = id;
     }

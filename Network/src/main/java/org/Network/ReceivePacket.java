@@ -3,7 +3,10 @@ package org.Network;
 import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -15,47 +18,51 @@ public class ReceivePacket {
     private DatagramSocket socket;
     private int port;
 
+    private HashMap<Integer, LinkedList<byte[]>> clients;
+    private HashMap<Integer, byte[]> map;
+    private HashMap<Integer, Integer> count;
+        
     public ReceivePacket(int port){
         this.port = port;
-        try {
-           // socket = new DatagramSocket(this.port);
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
+        
+        clients = new HashMap<Integer, LinkedList<byte[]>>();
+        map = new HashMap<Integer, byte[]>();
+        count = new HashMap<Integer, Integer>();
     }   
 
-    public byte[] Receive(){
-        byte[] buffer = new byte[1024];
-        try {
-            
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-
-            System.out.println("Dang doi tin nhan");
-            buffer = ACK.Receive(port);
-            System.out.println("da nhan duoc tin nhan");
-
-            InfoPacket info = Convert(buffer, InfoPacket.class);
-
-            int size = info.getSizeElementPacket();
-            buffer = new byte[size * info.getCount()];
-            boolean[] map = new boolean[info.getCount()];
-            int count = 0;
-            while(count != info.getCount()){
-                ImageData image = Convert(ACK.Receive(port), ImageData.class);
-                if(!map[image.getOrdinal()]){
-                    ++count;
-                    map[image.getOrdinal()] = true;
-                    System.arraycopy(image.getData(), 0, buffer, image.getOrdinal() * size, size);
-                }
+    public void ThreadReceive(){
+        Thread thread = new Thread(() -> {
+            ACKData ackData = ACK.Receive(port);
+            if(ackData.getClassT() == InfoPacket.class){
+                InfoPacket info = Convert(ackData.getData(), InfoPacket.class);
+                System.out.println("Nhan Infopacket");
+                count.put(info.getIpAddress(), (int)info.getCount()) ;
+                map.put(info.getIpAddress(), new byte[info.getCount() * info.getSizeElementPacket()]);
             }
+            else {
+                DataOrder dataOrder = Convert(ackData.getData(), DataOrder.class);
+                
+                int id = dataOrder.getIpAddress(); 
+                int sizeArray = dataOrder.getData().length;
 
-        } catch (Exception e) {
-            //TODO: handle exception
-        } 
-
-        System.out.println(buffer);
-        return buffer;
+                System.out.println("Nhan DataOrder");
+                System.arraycopy(dataOrder.getData(), 0, map.get(id), dataOrder.getOrdinal() * sizeArray, sizeArray);
+                count.put(id, count.get(dataOrder.getIpAddress()) - 1);
+                if(count.get(id) == 0){
+                    if(clients.containsKey(id)){
+                        clients.put(id, new LinkedList<byte[]>());
+                    }
+                    clients.get(id).push(map.get(dataOrder.getIpAddress()));
+                    count.remove(id);                }
+            }
+        }); 
+        thread.start();
     }
+
+    public byte[] Receive(int IPaddress){       
+        return clients.get(IPaddress).pop();
+    }
+
 
     public <T> T Convert(byte[] bytes, Class<T> classT){
         String s = new String(bytes, 0, bytes.length); 
