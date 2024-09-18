@@ -2,10 +2,10 @@ package org.Network;
 
 public class ACKData {
     private int id; // dung de xac nhan goi tin
-    private Class<?> classT; 
+    private String classT; 
     private byte[] data;
 
-    public ACKData(int id, Class<?> classT, byte[] data){
+    public ACKData(int id, String classT, byte[] data){
         this.id = id;
         this.classT = classT;
         this.data = data;
@@ -23,10 +23,10 @@ public class ACKData {
     public byte[] getData() {
         return data;
     }
-    public void setClassT(Class<?> classT) {
+    public void setClassT(String classT) {
         this.classT = classT;
     }
-    public Class<?> getClassT() {
+    public String getClassT() {
         return classT;
     }
 }

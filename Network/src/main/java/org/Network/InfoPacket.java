@@ -1,10 +1,10 @@
 package org.Network;
 
 public class InfoPacket {
+    private int ipAddress;
     private short id;
     private short count;
     private short sizeElementPacket;
-    private int ipAddress;
 
     public  InfoPacket(int ipAddress, short id, short count, short sizeElementpacket){
         this.ipAddress = ipAddress;

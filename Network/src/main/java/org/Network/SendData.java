@@ -31,14 +31,13 @@ public class SendData {
     }
     
     public void Send(byte[] buffer){
-        System.out.println("Gui packet");
         try {
             
             InfoPacket info = getInfor(buffer); 
 
             Gson gson = new Gson();
             byte[] bytes = gson.toJson(info).getBytes();
-            ACK.Send(bytes, InfoPacket.class, inetAddress, port);
+            ACK.Send(bytes, InfoPacket.class.getName(), inetAddress, port);
 
             for(int i = 0; i < info.getCount(); ++i){
                 byte[] bytesImage = new byte[info.getSizeElementPacket()];
@@ -46,8 +45,7 @@ public class SendData {
                 System.arraycopy(buffer, i*info.getSizeElementPacket(), bytesImage, 0, size);
                 DataOrder dataOrder = new DataOrder(intAdd, i, bytesImage);
                 byte[] send = gson.toJson(dataOrder).getBytes();
-                ACK.Send(send, DataOrder.class, inetAddress, port);
-
+                ACK.Send(send, DataOrder.class.getName(), inetAddress, port);
             }
 
             System.out.println(info.toString());

@@ -33,7 +33,7 @@ public class ReceivePacket {
     public void ThreadReceive(){
         Thread thread = new Thread(() -> {
             ACKData ackData = ACK.Receive(port);
-            if(ackData.getClassT() == InfoPacket.class){
+            if(ackData.getClassT() == InfoPacket.class.getName()){
                 InfoPacket info = Convert(ackData.getData(), InfoPacket.class);
                 System.out.println("Nhan Infopacket");
                 count.put(info.getIpAddress(), (int)info.getCount()) ;
