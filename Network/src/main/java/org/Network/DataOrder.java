@@ -28,4 +28,9 @@ public class DataOrder {
     public int getOrdinal() {
         return ordinal;
     }
+   
+    @Override
+    public String toString() {
+        return "" + ordinal + " " + ipAddress + " " + data.length;
+    }
 }

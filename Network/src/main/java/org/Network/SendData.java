@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 
 public class SendData {
     
-
     private DatagramSocket socket;
     private InetAddress inetAddress;
     private int port;
@@ -29,12 +28,23 @@ public class SendData {
             //TODO: handle exception
         }
     }
+
+    public SendData(String address, int port, String localHost){
+        try {
+            intAdd = AddressToInt(localHost);
+            socket = new DatagramSocket();
+            inetAddress = InetAddress.getByName(address);
+            this.port = port;
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
+    }
     
     public void Send(byte[] buffer){
         try {
             
             InfoPacket info = getInfor(buffer); 
-
+            System.out.println("Khoi luong tap tin "+buffer.length);
             Gson gson = new Gson();
             byte[] bytes = gson.toJson(info).getBytes();
             ACK.Send(bytes, InfoPacket.class.getName(), inetAddress, port);
@@ -44,6 +54,7 @@ public class SendData {
                 int size = Math.min(info.getSizeElementPacket(), buffer.length - (i) * info.getSizeElementPacket());
                 System.arraycopy(buffer, i*info.getSizeElementPacket(), bytesImage, 0, size);
                 DataOrder dataOrder = new DataOrder(intAdd, i, bytesImage);
+                System.out.println(dataOrder);
                 byte[] send = gson.toJson(dataOrder).getBytes();
                 ACK.Send(send, DataOrder.class.getName(), inetAddress, port);
             }
@@ -54,8 +65,6 @@ public class SendData {
         }
     }
 
-
-    
     public InfoPacket getInfor(byte[] bytes){
         int sizePacket = 4096;
 
@@ -63,7 +72,6 @@ public class SendData {
         return info;
     }
 
-    
     public static int AddressToInt(String ipAddress){
         try {
             InetAddress inet = InetAddress.getByName(ipAddress);
