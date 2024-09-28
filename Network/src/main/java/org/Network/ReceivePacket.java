@@ -5,8 +5,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -18,62 +21,141 @@ public class ReceivePacket {
     private DatagramSocket socket;
     private int port;
 
-    private HashMap<Integer, LinkedList<byte[]>> clients;
-    private HashMap<Integer, byte[]> map;
-    private HashMap<Integer, Integer> count;
-        
+    private HashMap<Integer, byte[]> clientScreen;
+
+    private Lock lock;
     public ReceivePacket(int port){
         this.port = port;
         
-        clients = new HashMap<Integer, LinkedList<byte[]>>();
-        map = new HashMap<Integer, byte[]>();
-        count = new HashMap<Integer, Integer>();
-    }   
+        lock = new ReentrantLock();
+        clientScreen = new HashMap<Integer, byte[]>();
 
-    public void ThreadReceive(){
         Thread thread = new Thread(() -> {
-            ACKData ackData = ACK.Receive(port);
-            if(ackData.getClassT() == InfoPacket.class){
+            while(true){
+                ThreadReceive();
+            }
+        });
+
+        thread.start();
+    }
+/*
+    public  void  ThreadReceive(){
+        ACKData ackData = ACK.Receive(port);
+        try {
+            if(ackData.getClassT().equals(InfoPacket.class.getName())){
                 InfoPacket info = Convert(ackData.getData(), InfoPacket.class);
-                System.out.println("Nhan Infopacket");
-                count.put(info.getIpAddress(), (int)info.getCount()) ;
-                map.put(info.getIpAddress(), new byte[info.getCount() * info.getSizeElementPacket()]);
+
+                int id = info.getIpAddress();
+                int size = info.getCount() * info.getSizeElementPacket();
+                if(!clientScreen.containsKey(id)){
+                    System.out.println("tao");
+                    lock.lock();
+                    try {
+                        clientScreen.put(id, new byte[size]);
+                    } catch (Exception e) {
+                        //TODO: handle exception
+                    } finally {
+                        lock.unlock();
+                    }
+
+                }
             }
             else {
                 DataOrder dataOrder = Convert(ackData.getData(), DataOrder.class);
                 int id = dataOrder.getIpAddress(); 
                 int sizeArray = dataOrder.getData().length;
-                System.out.println("Nhan DataOrder");
-                System.arraycopy(dataOrder.getData(), 0, map.get(id), dataOrder.getOrdinal() * sizeArray, sizeArray);
-                count.put(id, count.get(dataOrder.getIpAddress()) - 1);
-                if(count.get(id) == 0){
-                    if(clients.containsKey(id)){
-                        clients.put(id, new LinkedList<byte[]>());
-                    }
-                    clients.get(id).push(map.get(dataOrder.getIpAddress()));
-                    count.remove(id);                }
+                int ordinal = dataOrder.getOrdinal();
+
+                lock.lock();
+                try {
+                    System.arraycopy(dataOrder.getData(), 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                } finally {
+                    lock.unlock();
+                }
             }
-        }); 
-        thread.start();
+        } catch (Exception e) {
+            System.out.println("receive: " + e);
+        }
     }
+*/
 
-    public byte[] Receive(int IPaddress){       
-        return clients.get(IPaddress).pop();
-    }
-
-
-    public <T> T Convert(byte[] bytes, Class<T> classT){
-        String s = new String(bytes, 0, bytes.length); 
-        JsonReader reader = new JsonReader(new StringReader(s));
-        reader.setLenient(true); // Enable lenient mode
-
-        T t = null;
+    public void ThreadReceive(){
+        byte[] bytes = ACK.Receive(port);
         try {
-            t = new Gson().fromJson(reader, classT);
-        } catch (JsonSyntaxException e) {
+            if(bytes[SendData.sizeData + 4*3] == 0){
+
+                int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
+                int size = SendData.byteToInt(bytes, SendData.sizeData) * SendData.sizeData;
+
+
+                if(!clientScreen.containsKey(id)){
+                    lock.lock();
+                    try {
+                        clientScreen.put(id, new byte[size]);
+                    } catch (Exception e) {
+                        //TODO: handle exception
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+            }
+            else {
+                int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
+                int sizeArray = SendData.sizeData;
+                int ordinal = SendData.byteToInt(bytes, SendData.sizeData);
+
+                lock.lock();
+                try {
+                    System.arraycopy(bytes, 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                } finally {
+                    lock.unlock();
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("receive: " + e);
+        }
+
+    }
+    public  byte[] receive(int ipaddress){
+        if(clientScreen.containsKey(ipaddress))
+        {
+            byte[] data = null;
+            lock.lock();
+            try {
+                data = clientScreen.get(ipaddress);
+            } catch (Exception e) {
+                //TODO: handle exception
+            } finally {
+                lock.unlock();
+            }
+            return data;
+        }
+        return null;
+    }
+
+    public  byte[] receive(String ipaddress){
+        return receive(AddressToInt(ipaddress));
+    }
+
+
+    public static int AddressToInt(String ipAddress){
+        try {
+            InetAddress inet = InetAddress.getByName(ipAddress);
+            byte[] bytes = inet.getAddress();
+
+            int result = 0;
+            for (byte b : bytes) {
+                result = (result << 8) | (b & 0xFF); // Chuyển byte sang số nguyên và dồn vào kết quả
+            }
+
+            return result;
+        } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        
-        return t;
+        return -1;
     }
 }
