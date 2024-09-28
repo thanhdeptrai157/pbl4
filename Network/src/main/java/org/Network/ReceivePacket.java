@@ -38,7 +38,7 @@ public class ReceivePacket {
 
         thread.start();
     }   
-
+/*
     public  void  ThreadReceive(){
         ACKData ackData = ACK.Receive(port);
         try {
@@ -79,7 +79,47 @@ public class ReceivePacket {
             System.out.println("receive: " + e);
         }
     }
+*/
 
+    public void ThreadReceive(){
+        byte[] bytes = ACK.Receive(port);
+        try {
+            if(bytes[SendData.sizeData + 4*3] == 0){
+
+                int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
+                int size = SendData.byteToInt(bytes, SendData.sizeData) * SendData.sizeData;
+            
+
+                if(!clientScreen.containsKey(id)){
+                    lock.lock();
+                    try {
+                        clientScreen.put(id, new byte[size]);
+                    } catch (Exception e) {
+                        //TODO: handle exception
+                    } finally {
+                        lock.unlock();
+                    }
+                }
+            }
+            else {
+                int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
+                int sizeArray = SendData.sizeData;
+                int ordinal = SendData.byteToInt(bytes, SendData.sizeData);
+
+                lock.lock();
+                try {
+                    System.arraycopy(bytes, 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                } finally {
+                    lock.unlock();
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("receive: " + e);
+        }
+       
+    }
     public  byte[] receive(int ipaddress){   
         if(clientScreen.containsKey(ipaddress))
         {
@@ -101,20 +141,6 @@ public class ReceivePacket {
         return receive(AddressToInt(ipaddress));
     }
 
-    public <T> T Convert(byte[] bytes, Class<T> classT){
-        String s = new String(bytes, 0, bytes.length); 
-        JsonReader reader = new JsonReader(new StringReader(s));
-        reader.setLenient(true); // Enable lenient mode
-
-        T t = null;
-        try {
-            t = new Gson().fromJson(reader, classT);
-        } catch (JsonSyntaxException e) {
-            System.out.println("Chuyen" + e);
-        }
-        
-        return t;
-    }
 
     public static int AddressToInt(String ipAddress){
         try {
