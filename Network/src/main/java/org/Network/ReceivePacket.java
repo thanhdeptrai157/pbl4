@@ -41,10 +41,8 @@ public class ReceivePacket {
             }
             else {
                 DataOrder dataOrder = Convert(ackData.getData(), DataOrder.class);
-                
                 int id = dataOrder.getIpAddress(); 
                 int sizeArray = dataOrder.getData().length;
-
                 System.out.println("Nhan DataOrder");
                 System.arraycopy(dataOrder.getData(), 0, map.get(id), dataOrder.getOrdinal() * sizeArray, sizeArray);
                 count.put(id, count.get(dataOrder.getIpAddress()) - 1);

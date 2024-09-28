@@ -10,6 +10,8 @@ module com.example.gui {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires Server;
-    opens UserInterface to javafx.fxml;
-    exports UserInterface;
+    requires Client;
+    requires jdk.compiler;
+    opens UI to javafx.fxml;
+    exports UI;
 }

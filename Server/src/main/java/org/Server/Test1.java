@@ -1,4 +1,4 @@
-package org.module;
+package org.Server;
 
 public class Test1 {
     public void print(){

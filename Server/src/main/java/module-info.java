@@ -3,5 +3,5 @@ module Server {
     requires Network;
     requires com.google.gson;
 
-    exports org.module;
+    exports org.Server;
 }

@@ -18,7 +18,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>3.0.0</version> <!-- Hoặc phiên bản mới nhất -->
             <configuration>
-                <mainClass>org.module.MainServer</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
+                <mainClass>org.Server.MainServer</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
             </configuration>
         </plugin>
     </plugins>

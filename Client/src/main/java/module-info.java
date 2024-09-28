@@ -1,5 +1,5 @@
 module Client {
-    requires com.example.gui;
+    exports org.Client;
     requires java.desktop;
     requires Network;
 }
