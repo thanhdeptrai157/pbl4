@@ -43,7 +43,10 @@ public class ChatUI {
                     while(true){
                         try {
                             if (((message = in.readLine()) != null)){
-                                chatWindow.getItems().add("Anonymous: " + message);
+                                String finalMessage = message;
+                                Platform.runLater(()->{
+                                    chatWindow.getItems().add("Anonymous: " + finalMessage);
+                                });
                             }
                         } catch (IOException e) {
                             throw new RuntimeException(e);
