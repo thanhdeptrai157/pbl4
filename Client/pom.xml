@@ -8,7 +8,6 @@
         <artifactId>Maven_Multi_Module</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>Client</artifactId>
 
 <build>
@@ -18,7 +17,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>3.0.0</version> <!-- Hoặc phiên bản mới nhất -->
             <configuration>
-                <mainClass>org.module.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
+                <mainClass>org.Client.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
             </configuration>
         </plugin>
     </plugins>
@@ -34,6 +33,8 @@
             <artifactId>Network</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+
     </dependencies>
 
 </project>
