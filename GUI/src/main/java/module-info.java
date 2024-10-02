@@ -11,6 +11,7 @@ module com.example.gui {
     requires com.almasb.fxgl.all;
     requires Server;
     requires Client;
+    requires Network;
     requires jdk.compiler;
     opens UI to javafx.fxml;
     exports UI;

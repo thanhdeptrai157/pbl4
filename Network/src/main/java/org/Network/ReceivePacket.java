@@ -89,7 +89,6 @@ public class ReceivePacket {
                 int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
                 int size = SendData.byteToInt(bytes, SendData.sizeData) * SendData.sizeData;
 
-
                 if(!clientScreen.containsKey(id)){
                     lock.lock();
                     try {
@@ -120,7 +119,7 @@ public class ReceivePacket {
         }
 
     }
-    public  byte[] receive(int ipaddress){
+    public byte[] receive(int ipaddress){
         if(clientScreen.containsKey(ipaddress))
         {
             byte[] data = null;
@@ -137,7 +136,7 @@ public class ReceivePacket {
         return null;
     }
 
-    public  byte[] receive(String ipaddress){
+    public byte[] receive(String ipaddress){
         return receive(AddressToInt(ipaddress));
     }
 

@@ -63,7 +63,6 @@ public class ChatUI {
             chatStage.setTitle(name);
             chatStage.setScene(scene);
             chatStage.show();
-
         });
     }
 

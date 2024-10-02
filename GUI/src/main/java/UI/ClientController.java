@@ -1,6 +1,4 @@
 package UI;
-import com.sun.tools.javac.Main;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -22,7 +20,6 @@ public class ClientController {
         MainClient client = new MainClient(ip, port);
         ChatUI chatUI = new ChatUI();
         if(client.isConnected()){
-            //stage.close();
             new Thread(()->{
                 try {
                     chatUI.launchChatUI("Client");
@@ -36,4 +33,5 @@ public class ClientController {
     public void setStage(Stage stage) {
         this.stage = stage;
     }
+
 }
