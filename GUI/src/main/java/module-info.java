@@ -1,5 +1,4 @@
 module com.example.gui {
-    requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
     requires org.controlsfx.controls;
@@ -10,9 +9,9 @@ module com.example.gui {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires Server;
-    requires Client;
     requires Network;
     requires jdk.compiler;
+    requires Client;
     opens UI to javafx.fxml;
     exports UI;
 }

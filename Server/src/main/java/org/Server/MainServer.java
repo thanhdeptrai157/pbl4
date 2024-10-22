@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.*;
 
 
-
 public class MainServer {
     private ServerSocket serverSocket;
     private Socket clientSocket;
@@ -29,20 +28,15 @@ public class MainServer {
         receivePacket = new ReceivePacket(5002);
     }
 
-    /*public boolean waitForClient () throws IOException {
-        while (true) {
-            clientSocket = serverSocket.accept();
-            System.out.println("Client đã kết nối: " + clientSocket.getInetAddress().getHostName());
-            return true;
-        }
-    }*/
-    public void startServer() throws IOException {
+    public void startServer(ClientConnectionListener client) throws IOException {
         while(true){
             System.out.println("Server đang chờ kết nối");
             clientSocket = serverSocket.accept();
             System.out.println("Client đã kết nối: " + clientSocket.getInetAddress().getHostName());
+            if (client != null) {
+                client.onClientConnected(clientSocket.getInetAddress().getHostName());
+            }
             new ClientHandler(clientSocket).start();
-
         }
     }
     public Socket getClientSocket(){
@@ -51,7 +45,4 @@ public class MainServer {
     public ReceivePacket getReceivePacket(){
         return receivePacket;
     }
-
-
 }
-

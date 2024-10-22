@@ -4,6 +4,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.Client.MainClient;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class ClientController {
@@ -14,7 +15,6 @@ public class ClientController {
     private TextField portField;
     @FXML
     public void onConnectButton (){
-
         String ip = ipField.getText().trim();
         int port = Integer.parseInt(portField.getText().trim());
         MainClient client = new MainClient(ip, port);
@@ -24,7 +24,19 @@ public class ClientController {
                 try {
                     chatUI.launchChatUI("Client");
                     chatUI.setSocket(client.getSocket());
+
                 } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+            new Thread(()->{
+                try {
+                    client.commandFromServer();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (AWTException e) {
                     throw new RuntimeException(e);
                 }
             }).start();

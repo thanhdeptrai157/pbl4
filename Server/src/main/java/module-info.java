@@ -1,8 +1,8 @@
 module Server {
-    requires java.desktop;
-    requires Network;
-    requires com.google.gson;
     requires java.sql;
-
+    requires Network;
+    requires javafx.graphics;
+    requires java.desktop;
     exports org.Server;
+
 }
