@@ -8,7 +8,6 @@
         <artifactId>Maven_Multi_Module</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>Client</artifactId>
 
 <build>
@@ -18,7 +17,7 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>3.0.0</version> <!-- Hoặc phiên bản mới nhất -->
             <configuration>
-                <mainClass>org.module.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
+                <mainClass>org.Client.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
             </configuration>
         </plugin>
     </plugins>
@@ -34,6 +33,56 @@
             <artifactId>Network</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacv</artifactId>
+            <version>1.5.10</version> <!-- Phiên bản mới nhất -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>6.1.1-1.5.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>javacpp</artifactId>
+            <version>1.5.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>ffmpeg-platform</artifactId>
+            <version>6.1.1-1.5.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>20</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>20.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>20</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

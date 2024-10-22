@@ -1,0 +1,10 @@
+.layout{
+    -fx-background-color: linear-gradient(to bottom, #21A691, #060D10);
+}
+.button{
+    -fx-background-color: white;
+}
+.button:hover{
+    -fx-background-color: #21A691;
+    -fx-text-fill: white;
+}

@@ -1,0 +1,7 @@
+.sidebar{
+    -fx-background-color: #BDE9F7;
+    -fx-border-radius: 30px;
+}
+.layout{
+    -fx-background-color: linear-gradient(to left,#14919B ,#0AD1C8);
+}
