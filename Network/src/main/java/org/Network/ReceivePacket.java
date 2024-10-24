@@ -38,48 +38,6 @@ public class ReceivePacket {
 
         thread.start();
     }
-/*
-    public  void  ThreadReceive(){
-        ACKData ackData = ACK.Receive(port);
-        try {
-            if(ackData.getClassT().equals(InfoPacket.class.getName())){
-                InfoPacket info = Convert(ackData.getData(), InfoPacket.class);
-
-                int id = info.getIpAddress();
-                int size = info.getCount() * info.getSizeElementPacket();
-                if(!clientScreen.containsKey(id)){
-                    System.out.println("tao");
-                    lock.lock();
-                    try {
-                        clientScreen.put(id, new byte[size]);
-                    } catch (Exception e) {
-                        //TODO: handle exception
-                    } finally {
-                        lock.unlock();
-                    }
-
-                }
-            }
-            else {
-                DataOrder dataOrder = Convert(ackData.getData(), DataOrder.class);
-                int id = dataOrder.getIpAddress(); 
-                int sizeArray = dataOrder.getData().length;
-                int ordinal = dataOrder.getOrdinal();
-
-                lock.lock();
-                try {
-                    System.arraycopy(dataOrder.getData(), 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
-                } catch (Exception e) {
-                    //TODO: handle exception
-                } finally {
-                    lock.unlock();
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("receive: " + e);
-        }
-    }
-*/
 
     public void ThreadReceive(){
         byte[] bytes = ACK.Receive(port);
@@ -89,15 +47,13 @@ public class ReceivePacket {
                 int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
                 int size = SendData.byteToInt(bytes, SendData.sizeData) * SendData.sizeData;
 
-                if(!clientScreen.containsKey(id)){
-                    lock.lock();
-                    try {
-                        clientScreen.put(id, new byte[size]);
-                    } catch (Exception e) {
-                        //TODO: handle exception
-                    } finally {
-                        lock.unlock();
-                    }
+                lock.lock();
+                try {
+                    clientScreen.put(id, new byte[size]);
+                } catch (Exception e) {
+                    //TODO: handle exception
+                } finally {
+                    lock.unlock();
                 }
             }
             else {

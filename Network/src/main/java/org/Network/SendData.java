@@ -67,6 +67,7 @@ public class SendData {
                 byte[] byteOrdinal = intToByteArray(i);
                 byteIpaddress = intToByteArray(intAdd);
                 byteId = intToByteArray(idAck);
+                byte[] byteSizeOfImage = intToByteArray(buffer.length);
 
                 System.arraycopy(buffer, i * sizeData, bytes, 0, size);
                 System.arraycopy(byteOrdinal, 0, bytes, sizeData, byteCount.length);
@@ -105,7 +106,7 @@ public class SendData {
         try {
             InetAddress inet = InetAddress.getByName(ipAddress);
             byte[] bytes = inet.getAddress();
-            
+
             int result = 0;
             for (byte b : bytes) {
                 result = (result << 8) | (b & 0xFF); // Chuyển byte sang số nguyên và dồn vào kết quả
