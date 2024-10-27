@@ -21,6 +21,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ServerController implements ClientConnectionListener {
@@ -39,42 +40,6 @@ public class ServerController implements ClientConnectionListener {
             }
         }).start();
     }
-
-//    public void showImage() throws InterruptedException {
-//        while (true) {
-//            try {
-//                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive("127.0.0.1");
-//                BufferedImage bufferedImage = null;
-//                if (imageBytes != null) {
-//                    ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-//                    try {
-//                        bufferedImage = ImageIO.read(bis);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                    if (bufferedImage != null) {
-//                        BufferedImage finalBufferedImage = bufferedImage;
-//                        Platform.runLater(() -> {
-//                            try {
-//                                Image fxImage = SwingFXUtils.toFXImage(finalBufferedImage, null);
-//                                imageView.setImage(fxImage);
-//                                imageView.toFront();
-//                            } catch (Exception e) {
-//                                System.out.println("Error displaying image: " + e.getMessage());
-//                            }
-//                        });
-//                    } else {
-//                        System.out.println("BufferedImage is null, possibly corrupted image.");
-//                    }
-//                } else {
-//                    System.out.println("Received null image data.");
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                throw new RuntimeException(e);
-//            }
-//        }
-//    }
     private void openClientScreen() throws InterruptedException {
         Platform.runLater(() -> {
             Stage clientStage = new Stage();
@@ -94,49 +59,64 @@ public class ServerController implements ClientConnectionListener {
             Scene scene = new Scene(layout, 1200, 700);
             clientStage.setScene(scene);
             clientStage.show();
-            new Thread(() -> {
+            Thread imageThread = new Thread(() -> {
                 try {
                     showImageInView(clientImageView);
                 } catch (InterruptedException e) {
+                    System.out.println("Image update thread interrupted.");
+                }
+            });
+
+            imageThread.start();
+            clientStage.setOnCloseRequest(event -> {
+                try {
+                    PrintWriter writer = new PrintWriter(MainServer.getInstance().getClientSocket().getOutputStream(), true);
+                    writer.println("notView");
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }).start();
+                imageThread.interrupt();
+                System.out.println("Client stage closed, thread interrupted.");
+            });
         });
     }
+
     private void showImageInView(ImageView clientImageView) throws InterruptedException {
         while (true) {
             try {
                 byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive("127.0.0.1");
-                BufferedImage bufferedImage = null;
+
                 if (imageBytes != null) {
+                    BufferedImage bufferedImage = null;
                     ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+
                     try {
                         bufferedImage = ImageIO.read(bis);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (IOException e) {
+                        System.out.println("Error reading image: " + e.getMessage());
                     }
                     if (bufferedImage != null) {
-                        BufferedImage finalBufferedImage = bufferedImage;
+                        Image fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+
                         Platform.runLater(() -> {
-                            try {
-                                Image fxImage = SwingFXUtils.toFXImage(finalBufferedImage, null);
-                                clientImageView.setImage(fxImage);
-                            } catch (Exception e) {
-                                System.out.println("Error displaying image: " + e.getMessage());
-                            }
+                            clientImageView.setImage(fxImage);
                         });
                     } else {
-                        System.out.println("BufferedImage is null, possibly corrupted image.");
+                        System.out.println("Received corrupted image or image format not supported.");
                     }
                 } else {
                     System.out.println("Received null image data.");
                 }
+
+                Thread.sleep(10);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
     }
+
+
     private void addClientIndicator(String clientIP) {
 
         Rectangle clientIndicator = new Rectangle(400, 300);
@@ -149,7 +129,6 @@ public class ServerController implements ClientConnectionListener {
         Label clientLabel = new Label("Client IP: " + clientIP);
         clientLabel.setTextFill(Color.BLACK);
         clientLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
-
 
         Button viewScreenButton = new Button("Xem màn hình");
         viewScreenButton.setStyle("-fx-font-size: 16;");

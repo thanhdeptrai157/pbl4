@@ -22,6 +22,8 @@ public class ReceivePacket {
     private int port;
 
     private HashMap<Integer, byte[]> clientScreen;
+    private HashMap<Integer, Boolean> isImageReady;
+    private HashMap<Integer, Integer> countPartImage;
 
     private Lock lock;
     public ReceivePacket(int port){
@@ -29,7 +31,8 @@ public class ReceivePacket {
         
         lock = new ReentrantLock();
         clientScreen = new HashMap<Integer, byte[]>();
-
+        isImageReady = new HashMap<Integer, Boolean>();
+        countPartImage = new HashMap<Integer, Integer>();
         Thread thread = new Thread(() -> {
             while(true){
                 ThreadReceive();
@@ -85,19 +88,18 @@ public class ReceivePacket {
         byte[] bytes = ACK.Receive(port);
         try {
             if(bytes[SendData.sizeData + 4*3] == 0){
-
                 int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
-                int size = SendData.byteToInt(bytes, SendData.sizeData) * SendData.sizeData;
-
-                if(!clientScreen.containsKey(id)){
+                int countPart = SendData.byteToInt(bytes, SendData.sizeData);
+                int size = countPart * SendData.sizeData;
                     lock.lock();
                     try {
                         clientScreen.put(id, new byte[size]);
+                        isImageReady.put(id, false);
+                        countPartImage.put(id, countPart);
                     } catch (Exception e) {
-                        //TODO: handle exception
                     } finally {
                         lock.unlock();
-                    }
+
                 }
             }
             else {
@@ -108,6 +110,11 @@ public class ReceivePacket {
                 lock.lock();
                 try {
                     System.arraycopy(bytes, 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
+                    int count = countPartImage.get(id);
+                    countPartImage.put(id, --count);
+
+                    if(count == 0)
+                        isImageReady.put(id, true);
                 } catch (Exception e) {
                     //TODO: handle exception
                 } finally {
@@ -120,7 +127,7 @@ public class ReceivePacket {
 
     }
     public byte[] receive(int ipaddress){
-        if(clientScreen.containsKey(ipaddress))
+        if(clientScreen.containsKey(ipaddress) && isImageReady.containsKey(ipaddress) && isImageReady.get(ipaddress))
         {
             byte[] data = null;
             lock.lock();
