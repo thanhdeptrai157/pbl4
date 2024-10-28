@@ -21,7 +21,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ServerController implements ClientConnectionListener {
@@ -40,7 +39,7 @@ public class ServerController implements ClientConnectionListener {
             }
         }).start();
     }
-    private void openClientScreen() throws InterruptedException {
+    private void openClientScreen(String clientIP) throws InterruptedException {
         Platform.runLater(() -> {
             Stage clientStage = new Stage();
             clientStage.setTitle("Client Screen");
@@ -56,21 +55,20 @@ public class ServerController implements ClientConnectionListener {
             AnchorPane.setRightAnchor(clientImageView, 0.0);
             AnchorPane.setBottomAnchor(clientImageView, 0.0);
 
-            Scene scene = new Scene(layout, 1200, 700);
+            Scene scene = new Scene(layout, 1200, 780);
             clientStage.setScene(scene);
             clientStage.show();
             Thread imageThread = new Thread(() -> {
                 try {
-                    showImageInView(clientImageView);
+                    showImageInView(clientImageView, clientIP);
                 } catch (InterruptedException e) {
                     System.out.println("Image update thread interrupted.");
                 }
             });
-
             imageThread.start();
             clientStage.setOnCloseRequest(event -> {
                 try {
-                    PrintWriter writer = new PrintWriter(MainServer.getInstance().getClientSocket().getOutputStream(), true);
+                    PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
                     writer.println("notView");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -81,10 +79,11 @@ public class ServerController implements ClientConnectionListener {
         });
     }
 
-    private void showImageInView(ImageView clientImageView) throws InterruptedException {
+    private void showImageInView(ImageView clientImageView, String clienIP) throws InterruptedException {
+        System.out.println("server" + clienIP);
         while (true) {
             try {
-                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive("127.0.0.1");
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(clienIP);
 
                 if (imageBytes != null) {
                     BufferedImage bufferedImage = null;
@@ -105,10 +104,10 @@ public class ServerController implements ClientConnectionListener {
                         System.out.println("Received corrupted image or image format not supported.");
                     }
                 } else {
-                    System.out.println("Received null image data.");
+                   // System.out.println("Received null image data.");
                 }
-
                 Thread.sleep(10);
+                //if(!Thread.currentThread().isInterrupted()) Thread.sleep(10);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -135,7 +134,7 @@ public class ServerController implements ClientConnectionListener {
         viewScreenButton.setOnAction(event -> {
             System.out.println("Button clicked for client: " + clientIP);
             try {
-                PrintWriter writer = new PrintWriter(MainServer.getInstance().getClientSocket().getOutputStream(), true);
+                PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
                 writer.println("view");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -143,7 +142,7 @@ public class ServerController implements ClientConnectionListener {
 
             new Thread(()->{
                 try {
-                    openClientScreen();
+                    openClientScreen(clientIP);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -154,7 +153,7 @@ public class ServerController implements ClientConnectionListener {
         lockScreenButton.setStyle("-fx-font-size: 16;");
         lockScreenButton.setOnAction(event -> {
             try {
-                PrintWriter writer = new PrintWriter(MainServer.getInstance().getClientSocket().getOutputStream(), true);
+                PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
                 writer.println("lock");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -167,7 +166,7 @@ public class ServerController implements ClientConnectionListener {
            Platform.runLater(()->{
                chatUI.launchChatUI("Server");
                try {
-                   chatUI.setSocket(MainServer.getInstance().getClientSocket());
+                   chatUI.setSocket(MainServer.getInstance().getSocketMap().get(clientIP));
                } catch (IOException e) {
                    throw new RuntimeException(e);
                }

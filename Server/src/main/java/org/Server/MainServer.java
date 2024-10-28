@@ -2,14 +2,15 @@ package org.Server;
 
 
 import org.Network.ReceivePacket;
-
 import java.io.IOException;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MainServer {
     private ServerSocket serverSocket;
-    private Socket clientSocket;
+    private Map<String, Socket> socketMap = new HashMap<>();
     private static MainServer instance = null;
     private ReceivePacket receivePacket;
     public static MainServer getInstance() throws IOException {
@@ -31,18 +32,19 @@ public class MainServer {
     public void startServer(ClientConnectionListener client) throws IOException {
         while(true){
             System.out.println("Server đang chờ kết nối");
-            clientSocket = serverSocket.accept();
+            Socket clientSocket = serverSocket.accept();
+            socketMap.put(clientSocket.getInetAddress().getHostAddress(), clientSocket);
             System.out.println("Client đã kết nối: " + clientSocket.getInetAddress().getHostName());
             if (client != null) {
-                client.onClientConnected(clientSocket.getInetAddress().getHostName());
+                client.onClientConnected(clientSocket.getInetAddress().getHostAddress());
             }
-            new ClientHandler(clientSocket).start();
+            //new ClientHandler(clientSocket).start();
         }
-    }
-    public Socket getClientSocket(){
-        return clientSocket;
     }
     public ReceivePacket getReceivePacket(){
         return receivePacket;
+    }
+    public Map<String, Socket> getSocketMap(){
+        return socketMap;
     }
 }

@@ -19,7 +19,7 @@ public class ClientUi extends Application {
         ClientController controller = fxmlLoader.getController();
         controller.setStage(stage);
     }
-    public static void launchUI(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 }
