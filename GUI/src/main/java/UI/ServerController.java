@@ -63,6 +63,8 @@ public class ServerController implements ClientConnectionListener {
                     showImageInView(clientImageView, clientIP);
                 } catch (InterruptedException e) {
                     System.out.println("Image update thread interrupted.");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             });
             imageThread.start();
@@ -79,11 +81,11 @@ public class ServerController implements ClientConnectionListener {
         });
     }
 
-    private void showImageInView(ImageView clientImageView, String clienIP) throws InterruptedException {
-        System.out.println("server" + clienIP);
+    private void showImageInView(ImageView clientImageView, String clientIP) throws InterruptedException, IOException {
+        System.out.println("server" + clientIP);
         while (true) {
             try {
-                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(clienIP);
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(clientIP);
 
                 if (imageBytes != null) {
                     BufferedImage bufferedImage = null;
@@ -166,7 +168,7 @@ public class ServerController implements ClientConnectionListener {
            Platform.runLater(()->{
                chatUI.launchChatUI("Server");
                try {
-                   chatUI.setSocket(MainServer.getInstance().getSocketMap().get(clientIP));
+                   chatUI.setSocket(MainServer.getInstance().getSocketMapChat().get(clientIP));
                } catch (IOException e) {
                    throw new RuntimeException(e);
                }

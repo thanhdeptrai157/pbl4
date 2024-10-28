@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,23 +23,27 @@ public class MainClient {
     private Thread view;
     private String ipServer;
     private boolean isConnected;
-    private Socket socket;
+    private Socket cmdSocket;
+    private Socket chatSocket;
     private String ipClient;
     private ExecutorService executorService = Executors.newCachedThreadPool();
     public MainClient(String url, int port){
         ipServer = url;
         try {
-
-            socket = new Socket(url, port);
-            ipClient = socket.getInetAddress().getHostAddress();
+            cmdSocket = new Socket(url, port);
+            chatSocket = new Socket(url, 5003);
+            //lưu địa chỉ ip do Server gửi về để truyền ảnh
+            BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
+            String s = br.readLine();
+            ipClient = s;
             isConnected = true;
         } catch (Exception e) {
             isConnected = false;
             throw new RuntimeException(e);
         }
     }
-    public Socket getSocket(){
-        return socket;
+    public Socket getSocketCmd(){
+        return cmdSocket;
     }
 
     public boolean isConnected() {
@@ -49,10 +52,9 @@ public class MainClient {
 
     public void commandFromServer() throws IOException, InterruptedException, AWTException {
         System.out.println("Command listener started.");
-        socket.setSoTimeout(1000);
-        BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        //ipClient = br.readLine();
-        System.out.println(ipClient);
+        cmdSocket.setSoTimeout(1000);
+        BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
+
         while (true) {
             try {
                 String s = br.readLine();
@@ -120,7 +122,9 @@ public class MainClient {
         }
     }
 
-
+    public Socket getChatSocket(){
+        return chatSocket;
+    }
     public void lockScreen(){
         String command = "rundll32.exe user32.dll,LockWorkStation";
         try {
