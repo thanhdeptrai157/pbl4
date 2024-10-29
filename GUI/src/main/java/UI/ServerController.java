@@ -126,7 +126,6 @@ public class ServerController implements ClientConnectionListener {
         clientIndicator.setArcHeight(10);
         clientIndicator.setArcWidth(10);
 
-
         Label clientLabel = new Label("Client IP: " + clientIP);
         clientLabel.setTextFill(Color.BLACK);
         clientLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
@@ -142,7 +141,7 @@ public class ServerController implements ClientConnectionListener {
                 throw new RuntimeException(e);
             }
 
-            new Thread(()->{
+            new Thread(() -> {
                 try {
                     openClientScreen(clientIP);
                 } catch (InterruptedException e) {
@@ -160,37 +159,44 @@ public class ServerController implements ClientConnectionListener {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
         });
+
         Button message = new Button("Chat");
         message.setStyle("-fx-font-size: 16;");
         message.setOnAction(event -> {
-           Platform.runLater(()->{
-               chatUI.launchChatUI("Server");
-               try {
-                   chatUI.setSocket(MainServer.getInstance().getSocketMapChat().get(clientIP));
-               } catch (IOException e) {
-                   throw new RuntimeException(e);
-               }
-           });
-
+            Platform.runLater(() -> {
+                chatUI.launchChatUI("Server Chat with " + clientIP);
+                try {
+                    if (chatUI.getSocket() == null || chatUI.getSocket().isClosed()) {
+                        chatUI.setSocket(MainServer.getInstance().getSocketMapChat().get(clientIP));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         });
-        double yOffset = 50 + (mainLayout.getChildren().size() / 3 * 60);
 
+
+
+        int clientCount = mainLayout.getChildren().size() / 5;
+        double xOffset = 50 + (clientCount % 3) * 450;
+        double yOffset = 50 + (clientCount / 3) * 400;
 
         AnchorPane.setTopAnchor(clientIndicator, yOffset);
-        AnchorPane.setLeftAnchor(clientIndicator, 50.0);
-
+        AnchorPane.setLeftAnchor(clientIndicator, xOffset);
 
         AnchorPane.setTopAnchor(clientLabel, yOffset + 20);
-        AnchorPane.setLeftAnchor(clientLabel, 60.0);
+        AnchorPane.setLeftAnchor(clientLabel, xOffset + 10);
 
         AnchorPane.setTopAnchor(viewScreenButton, yOffset + 60);
-        AnchorPane.setLeftAnchor(viewScreenButton, 60.0);
+        AnchorPane.setLeftAnchor(viewScreenButton, xOffset + 10);
+
         AnchorPane.setTopAnchor(lockScreenButton, yOffset + 60);
-        AnchorPane.setLeftAnchor(lockScreenButton, 240.0);
+        AnchorPane.setLeftAnchor(lockScreenButton, xOffset + 180);
+
         AnchorPane.setTopAnchor(message, yOffset + 120);
-        AnchorPane.setLeftAnchor(message, 60.0);
+        AnchorPane.setLeftAnchor(message, xOffset + 10);
+
         mainLayout.getChildren().addAll(clientIndicator, clientLabel, viewScreenButton, lockScreenButton, message);
         System.out.println("Client IP: " + clientIP);
     }
