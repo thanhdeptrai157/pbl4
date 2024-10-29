@@ -164,7 +164,7 @@ public class ServerController implements ClientConnectionListener {
         clientIndicator.setArcWidth(10);
 
         // Load computer icon
-        ImageView computerIcon = new ImageView(new Image(new FileInputStream("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg")));
+        ImageView computerIcon = new ImageView(new Image(new FileInputStream("D:\\Intelliji Program\\ProjectPBL4\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg")));
         computerIcon.setFitWidth(120);
         computerIcon.setFitHeight(120);
 
