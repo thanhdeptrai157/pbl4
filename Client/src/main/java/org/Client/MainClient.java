@@ -135,7 +135,7 @@ public class MainClient {
     }
     public void receiveScreen() throws AWTException, InterruptedException {
         System.out.println("View");
-        SendData sendData = new SendData(ipServer, 5002, ipClient);
+        SendData sendData = new SendData(ipServer, 5002, "172.1.1.1");
         System.out.println("client " + ipClient);
         byte[] imageInBytes = null;
         Robot robot = new Robot();

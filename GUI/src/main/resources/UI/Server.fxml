@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780" prefWidth="1470" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.ServerController">
    <children>
-      <AnchorPane layoutX="1.0" prefHeight="780.0" prefWidth="225.0" style="-fx-background-color: #F4CED9;" />
+      <AnchorPane layoutX="1.0" prefHeight="780.0" prefWidth="225.0" style="-fx-background-color: #F4CED9;">
+         <children>
+            <Button layoutX="27.0" layoutY="116.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Gửi bài tập" />
+            <Button layoutX="27.0" layoutY="195.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Gửi thông báo" />
+            <Button layoutX="27.0" layoutY="272.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Khoá máy tất cả" />
+            <Button layoutX="27.0" layoutY="349.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Chụp màn hình tất cả" />
+         </children></AnchorPane>
       <AnchorPane fx:id="mainLayout" layoutX="228.0" prefHeight="780.0" prefWidth="1244.0" style="-fx-background-color: #ccffff;" />
    </children>
 </Pane>

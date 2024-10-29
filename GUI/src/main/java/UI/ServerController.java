@@ -4,13 +4,21 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.Server.ClientConnectionListener;
@@ -18,9 +26,10 @@ import org.Server.MainServer;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 
 public class ServerController implements ClientConnectionListener {
@@ -28,6 +37,12 @@ public class ServerController implements ClientConnectionListener {
     @FXML
     private AnchorPane mainLayout;
     private ChatUI chatUI;
+    private final Map<String, ChatUI> clientChats = new HashMap<>();
+    private volatile boolean isRunning = true;
+
+    public void stopImageReceiving() {
+        isRunning = false;
+    }
     @FXML
     public void initialize() throws IOException {
         chatUI = new ChatUI();
@@ -72,6 +87,7 @@ public class ServerController implements ClientConnectionListener {
                 try {
                     PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
                     writer.println("notView");
+                    stopImageReceiving();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -83,9 +99,10 @@ public class ServerController implements ClientConnectionListener {
 
     private void showImageInView(ImageView clientImageView, String clientIP) throws InterruptedException, IOException {
         System.out.println("server" + clientIP);
-        while (true) {
+        isRunning = true;
+        while (isRunning) {
             try {
-                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(clientIP);
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive("172.1.1.1");
 
                 if (imageBytes != null) {
                     BufferedImage bufferedImage = null;
@@ -109,7 +126,7 @@ public class ServerController implements ClientConnectionListener {
                    // System.out.println("Received null image data.");
                 }
                 Thread.sleep(10);
-                //if(!Thread.currentThread().isInterrupted()) Thread.sleep(10);
+
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -117,30 +134,70 @@ public class ServerController implements ClientConnectionListener {
         }
     }
 
+    private void openChatWindow(String clientIP) {
+        Platform.runLater(() -> {
+            ChatUI chatUI = clientChats.get(clientIP);
+            if (chatUI == null) {
+                chatUI = new ChatUI();
+                clientChats.put(clientIP, chatUI);
+                try {
+                    chatUI.setSocket(MainServer.getInstance().getSocketMapChat().get(clientIP));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            chatUI.launchChatUI("Server Chat with " + clientIP);
+        });
+    }
 
-    private void addClientIndicator(String clientIP) {
+    private int clientCounter = 0;
 
-        Rectangle clientIndicator = new Rectangle(400, 300);
-        clientIndicator.setFill(Color.LIGHTBLUE);
-        clientIndicator.setStroke(Color.DARKBLUE);
+    private void addClientIndicator(String clientIP) throws FileNotFoundException {
+        Rectangle clientIndicator = new Rectangle(350, 250);
+        clientIndicator.setFill(new LinearGradient(
+                0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.LIGHTSTEELBLUE),
+                new Stop(1, Color.STEELBLUE)
+        ));
+        clientIndicator.setStroke(Color.DARKSLATEBLUE);
         clientIndicator.setArcHeight(10);
         clientIndicator.setArcWidth(10);
 
+        // Load computer icon
+        ImageView computerIcon = new ImageView(new Image(new FileInputStream("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg")));
+        computerIcon.setFitWidth(120);
+        computerIcon.setFitHeight(120);
+
+        // Client IP label
         Label clientLabel = new Label("Client IP: " + clientIP);
         clientLabel.setTextFill(Color.BLACK);
         clientLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
 
+        HBox labelBox = new HBox(10, clientLabel);
+        labelBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Button setup
         Button viewScreenButton = new Button("Xem màn hình");
+        Button lockScreenButton = new Button("Lock màn hình");
+        Button messageButton = new Button("Chat");
+
+        // Set uniform button style and width
+        double buttonWidth = 160;
+        viewScreenButton.setPrefWidth(buttonWidth);
+        lockScreenButton.setPrefWidth(buttonWidth);
+        messageButton.setPrefWidth(buttonWidth);
         viewScreenButton.setStyle("-fx-font-size: 16;");
+        lockScreenButton.setStyle("-fx-font-size: 16;");
+        messageButton.setStyle("-fx-font-size: 16;");
+
+        // Button actions
         viewScreenButton.setOnAction(event -> {
-            System.out.println("Button clicked for client: " + clientIP);
             try {
                 PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
                 writer.println("view");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
             new Thread(() -> {
                 try {
                     openClientScreen(clientIP);
@@ -150,8 +207,6 @@ public class ServerController implements ClientConnectionListener {
             }).start();
         });
 
-        Button lockScreenButton = new Button("Lock màn hình");
-        lockScreenButton.setStyle("-fx-font-size: 16;");
         lockScreenButton.setOnAction(event -> {
             try {
                 PrintWriter writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
@@ -161,49 +216,43 @@ public class ServerController implements ClientConnectionListener {
             }
         });
 
-        Button message = new Button("Chat");
-        message.setStyle("-fx-font-size: 16;");
-        message.setOnAction(event -> {
-            Platform.runLater(() -> {
-                chatUI.launchChatUI("Server Chat with " + clientIP);
-                try {
-                    if (chatUI.getSocket() == null || chatUI.getSocket().isClosed()) {
-                        chatUI.setSocket(MainServer.getInstance().getSocketMapChat().get(clientIP));
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        });
+        messageButton.setOnAction(event -> openChatWindow(clientIP));
 
+        // Layout for buttons and icon on the right
+        VBox buttonBox = new VBox(10, viewScreenButton, lockScreenButton, messageButton);
+        buttonBox.setAlignment(Pos.TOP_LEFT);
+        HBox mainContentBox = new HBox(10, buttonBox, computerIcon);
+        mainContentBox.setAlignment(Pos.CENTER_LEFT);
 
+        VBox clientBox = new VBox(10, labelBox, mainContentBox);
+        clientBox.setPadding(new Insets(20));
+        clientBox.setAlignment(Pos.TOP_LEFT);
 
-        int clientCount = mainLayout.getChildren().size() / 5;
-        double xOffset = 50 + (clientCount % 3) * 450;
-        double yOffset = 50 + (clientCount / 3) * 400;
+        StackPane clientPane = new StackPane(clientIndicator, clientBox);
 
-        AnchorPane.setTopAnchor(clientIndicator, yOffset);
-        AnchorPane.setLeftAnchor(clientIndicator, xOffset);
+        double xOffset = 50 + (clientCounter % 3) * 400;
+        double yOffset = 50 + (clientCounter / 3) * 400;
 
-        AnchorPane.setTopAnchor(clientLabel, yOffset + 20);
-        AnchorPane.setLeftAnchor(clientLabel, xOffset + 10);
+        AnchorPane.setTopAnchor(clientPane, yOffset);
+        AnchorPane.setLeftAnchor(clientPane, xOffset);
 
-        AnchorPane.setTopAnchor(viewScreenButton, yOffset + 60);
-        AnchorPane.setLeftAnchor(viewScreenButton, xOffset + 10);
+        mainLayout.getChildren().add(clientPane);
+        clientCounter++; // Increment counter after adding each client
 
-        AnchorPane.setTopAnchor(lockScreenButton, yOffset + 60);
-        AnchorPane.setLeftAnchor(lockScreenButton, xOffset + 180);
-
-        AnchorPane.setTopAnchor(message, yOffset + 120);
-        AnchorPane.setLeftAnchor(message, xOffset + 10);
-
-        mainLayout.getChildren().addAll(clientIndicator, clientLabel, viewScreenButton, lockScreenButton, message);
         System.out.println("Client IP: " + clientIP);
     }
 
 
+
+
     @Override
     public void onClientConnected(String clientIP) {
-        Platform.runLater(() -> addClientIndicator(clientIP));
+        Platform.runLater(() -> {
+            try {
+                addClientIndicator(clientIP);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 }
