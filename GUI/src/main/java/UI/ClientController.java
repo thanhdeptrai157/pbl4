@@ -22,7 +22,7 @@ public class ClientController {
         if(client.isConnected()){
             new Thread(()->{
                 try {
-                    chatUI.launchChatUI("Client");
+                    chatUI.launchChatUI("Client", 2);
                     chatUI.setSocket(client.getChatSocket());
                 } catch (IOException e) {
                     throw new RuntimeException(e);

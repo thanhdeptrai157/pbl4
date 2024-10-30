@@ -28,8 +28,7 @@ public class ChatUI {
         messageInput = new TextField(); // Khởi tạo TextField một lần
     }
 
-    public void launchChatUI(String name) {
-        // Nếu `chatStage` đã tồn tại và đang hiển thị thì chỉ đưa nó lên trước.
+    public void launchChatUI(String name, int id) {
         if (chatStage != null && chatStage.isShowing()) {
             chatStage.toFront();
             return;
@@ -54,8 +53,8 @@ public class ChatUI {
 
                 // Xử lý sự kiện đóng cửa sổ để chỉ ẩn cửa sổ thay vì đóng hoàn toàn
                 chatStage.setOnCloseRequest(event -> {
-                    event.consume(); // Ngăn chặn hành động đóng mặc định
-                    chatStage.hide(); // Ẩn cửa sổ thay vì đóng
+                    event.consume();
+                    chatStage.hide();
                 });
 
                 // Luồng nhận tin nhắn từ client
@@ -64,7 +63,7 @@ public class ChatUI {
                     try {
                         while (!Thread.currentThread().isInterrupted() && (message = in.readLine()) != null) {
                             String finalMessage = message;
-                            Platform.runLater(() -> chatWindow.getItems().add("Anonymous: " + finalMessage));
+                            Platform.runLater(() -> chatWindow.getItems().add(id == 1? "Client: "+ finalMessage : "Server: " + finalMessage));
                         }
                     } catch (IOException e) {
                         System.out.println("Error receiving message: " + e.getMessage());
@@ -84,10 +83,10 @@ public class ChatUI {
 
     public void setSocket(Socket socket) throws IOException {
         this.socket = socket;
-        if (writer == null) { // Khởi tạo `writer` nếu chưa tồn tại
+        if (writer == null) {
             writer = new PrintWriter(socket.getOutputStream(), true);
         }
-        if (in == null) { // Khởi tạo `in` nếu chưa tồn tại
+        if (in == null) {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         }
     }

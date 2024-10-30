@@ -34,6 +34,7 @@ public class SendData {
     public SendData(String address, int port, String localHost){
         try {
             intAdd = AddressToInt(localHost);
+            System.out.println(intAdd);
             socket = new DatagramSocket();
             inetAddress = InetAddress.getByName(address);
             this.port = port;

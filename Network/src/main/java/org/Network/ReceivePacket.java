@@ -41,54 +41,14 @@ public class ReceivePacket {
 
         thread.start();
     }
-/*
-    public  void  ThreadReceive(){
-        ACKData ackData = ACK.Receive(port);
-        try {
-            if(ackData.getClassT().equals(InfoPacket.class.getName())){
-                InfoPacket info = Convert(ackData.getData(), InfoPacket.class);
-
-                int id = info.getIpAddress();
-                int size = info.getCount() * info.getSizeElementPacket();
-                if(!clientScreen.containsKey(id)){
-                    System.out.println("tao");
-                    lock.lock();
-                    try {
-                        clientScreen.put(id, new byte[size]);
-                    } catch (Exception e) {
-                        //TODO: handle exception
-                    } finally {
-                        lock.unlock();
-                    }
-
-                }
-            }
-            else {
-                DataOrder dataOrder = Convert(ackData.getData(), DataOrder.class);
-                int id = dataOrder.getIpAddress(); 
-                int sizeArray = dataOrder.getData().length;
-                int ordinal = dataOrder.getOrdinal();
-
-                lock.lock();
-                try {
-                    System.arraycopy(dataOrder.getData(), 0, clientScreen.get(id), ordinal * sizeArray, sizeArray);
-                } catch (Exception e) {
-                    //TODO: handle exception
-                } finally {
-                    lock.unlock();
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("receive: " + e);
-        }
-    }
-*/
 
     public void ThreadReceive(){
         byte[] bytes = ACK.Receive(port);
         try {
             if(bytes[SendData.sizeData + 4*3] == 0){
+
                 int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
+                System.out.println(id);
                 int countPart = SendData.byteToInt(bytes, SendData.sizeData);
                 int size = countPart * SendData.sizeData;
                     lock.lock();
@@ -127,8 +87,10 @@ public class ReceivePacket {
 
     }
     public byte[] receive(int ipaddress){
+
         if(clientScreen.containsKey(ipaddress) && isImageReady.containsKey(ipaddress) && isImageReady.get(ipaddress))
         {
+           // System.out.println("reci"+ ipaddress);
             byte[] data = null;
             lock.lock();
             try {

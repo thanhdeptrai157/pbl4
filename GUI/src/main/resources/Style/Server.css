@@ -1,7 +1,30 @@
-.sidebar{
-    -fx-background-color: #BDE9F7;
-    -fx-border-radius: 30px;
+/* Sidebar with light blue background */
+.anchor-pane-sidebar {
+    -fx-background-color: #E0F7FA; /* Light blue */
 }
-.layout{
-    -fx-background-color: linear-gradient(to left,#14919B ,#0AD1C8);
+
+/* Main layout with soft purple background */
+.anchor-pane-main {
+    -fx-background-color: #B39DDB; /* Soft purple */
+}
+
+/* Button styling with soft blue-to-purple gradient */
+.button {
+    -fx-background-color: linear-gradient(to bottom, #81D4FA, #9575CD); /* Light blue to soft purple */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 3);
+}
+
+/* Button hover effect with darker blue-to-purple gradient */
+.button:hover {
+    -fx-background-color: linear-gradient(to bottom, #4FC3F7, #7E57C2); /* Slightly darker blue to purple */
+}
+
+/* Button pressed effect with even darker gradient */
+.button:pressed {
+    -fx-background-color: linear-gradient(to bottom, #29B6F6, #673AB7); /* Darker blue to purple */
 }
