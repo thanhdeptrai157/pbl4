@@ -20,20 +20,11 @@ public class SendData {
     public static final int id = 4;
     public static final int type = 1;
 
-    public SendData(String address, int port){
-        try {
-            intAdd = AddressToInt(InetAddress.getLocalHost().getHostName());
-            socket = new DatagramSocket();
-            inetAddress = InetAddress.getByName(address);
-            this.port = port;
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
-    }
 
-    public SendData(String address, int port, String localHost){
+
+    public SendData(String address, int port, int numClient){
         try {
-            intAdd = AddressToInt(localHost);
+            intAdd = numClient;
             System.out.println(intAdd);
             socket = new DatagramSocket();
             inetAddress = InetAddress.getByName(address);
@@ -61,7 +52,6 @@ public class SendData {
         bytes[sizeData + ipAddress + numberOfPart + id] = 0;
         ACK.Send(bytes, inetAddress, port);
         for(int i = 0; i < count; ++i){
-                byte[] bytesImage = new byte[sizeData + ordinal + ipAddress + id + type];
                 idAck = new Random().nextInt();
                 int size = Math.min(sizeData, buffer.length - (i) * sizeData);
 
@@ -102,20 +92,4 @@ public class SendData {
         return value;
     }
 
-    public static int AddressToInt(String ipAddress){
-        try {
-            InetAddress inet = InetAddress.getByName(ipAddress);
-            byte[] bytes = inet.getAddress();
-            
-            int result = 0;
-            for (byte b : bytes) {
-                result = (result << 8) | (b & 0xFF); // Chuyển byte sang số nguyên và dồn vào kết quả
-            }
-
-            return result;
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
 }

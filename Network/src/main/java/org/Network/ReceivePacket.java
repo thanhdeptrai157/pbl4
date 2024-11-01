@@ -20,7 +20,6 @@ public class ReceivePacket {
     
     private DatagramSocket socket;
     private int port;
-
     private HashMap<Integer, byte[]> clientScreen;
     private HashMap<Integer, Boolean> isImageReady;
     private HashMap<Integer, Integer> countPartImage;
@@ -28,7 +27,6 @@ public class ReceivePacket {
     private Lock lock;
     public ReceivePacket(int port){
         this.port = port;
-        
         lock = new ReentrantLock();
         clientScreen = new HashMap<Integer, byte[]>();
         isImageReady = new HashMap<Integer, Boolean>();
@@ -46,9 +44,7 @@ public class ReceivePacket {
         byte[] bytes = ACK.Receive(port);
         try {
             if(bytes[SendData.sizeData + 4*3] == 0){
-
                 int id = SendData.byteToInt(bytes, SendData.sizeData + 4);
-                System.out.println(id);
                 int countPart = SendData.byteToInt(bytes, SendData.sizeData);
                 int size = countPart * SendData.sizeData;
                     lock.lock();
@@ -59,7 +55,6 @@ public class ReceivePacket {
                     } catch (Exception e) {
                     } finally {
                         lock.unlock();
-
                 }
             }
             else {
@@ -84,46 +79,20 @@ public class ReceivePacket {
         } catch (Exception e) {
             System.out.println("receive: " + e);
         }
-
     }
     public byte[] receive(int ipaddress){
-
         if(clientScreen.containsKey(ipaddress) && isImageReady.containsKey(ipaddress) && isImageReady.get(ipaddress))
         {
-           // System.out.println("reci"+ ipaddress);
             byte[] data = null;
             lock.lock();
             try {
                 data = clientScreen.get(ipaddress);
             } catch (Exception e) {
-                //TODO: handle exception
             } finally {
                 lock.unlock();
             }
             return data;
         }
         return null;
-    }
-
-    public byte[] receive(String ipaddress){
-        return receive(AddressToInt(ipaddress));
-    }
-
-
-    public static int AddressToInt(String ipAddress){
-        try {
-            InetAddress inet = InetAddress.getByName(ipAddress);
-            byte[] bytes = inet.getAddress();
-
-            int result = 0;
-            for (byte b : bytes) {
-                result = (result << 8) | (b & 0xFF); // Chuyển byte sang số nguyên và dồn vào kết quả
-            }
-
-            return result;
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return -1;
     }
 }

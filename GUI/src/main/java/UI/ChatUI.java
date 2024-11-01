@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import org.Network.Encode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,12 +21,12 @@ public class ChatUI {
     private PrintWriter writer;
     private BufferedReader in;
     private Stage chatStage;
-    private ListView<String> chatWindow; // Tạo biến thành viên cho ListView
+    private ListView<String> chatWindow;
     private TextField messageInput;
 
     public ChatUI() {
-        chatWindow = new ListView<>(); // Khởi tạo ListView một lần
-        messageInput = new TextField(); // Khởi tạo TextField một lần
+        chatWindow = new ListView<>();
+        messageInput = new TextField();
     }
 
     public void launchChatUI(String name, int id) {
@@ -35,38 +36,40 @@ public class ChatUI {
         }
 
         Platform.runLater(() -> {
-            // Kiểm tra xem `chatStage` đã được tạo chưa
             if (chatStage == null) {
                 chatStage = new Stage();
                 messageInput.setPromptText("Nhập tin nhắn...");
                 Button sendButton = new Button("Gửi");
                 HBox inputBox = new HBox(10, messageInput, sendButton);
-
                 sendButton.setOnAction(e -> {
                     String message = messageInput.getText();
                     if (!message.isEmpty()) {
                         chatWindow.getItems().add("You: " + message);
-                        writer.println(message);
+                        try {
+                            writer.println(Encode.encode(message));
+                        } catch (Exception ex) {
+                            throw new RuntimeException(ex);
+                        }
                         messageInput.clear();
                     }
                 });
 
-                // Xử lý sự kiện đóng cửa sổ để chỉ ẩn cửa sổ thay vì đóng hoàn toàn
+
                 chatStage.setOnCloseRequest(event -> {
                     event.consume();
                     chatStage.hide();
                 });
-
-                // Luồng nhận tin nhắn từ client
                 new Thread(() -> {
                     String message;
                     try {
                         while (!Thread.currentThread().isInterrupted() && (message = in.readLine()) != null) {
-                            String finalMessage = message;
+                            String finalMessage = Encode.decode(message);
                             Platform.runLater(() -> chatWindow.getItems().add(id == 1? "Client: "+ finalMessage : "Server: " + finalMessage));
                         }
                     } catch (IOException e) {
                         System.out.println("Error receiving message: " + e.getMessage());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }).start();
 
@@ -77,7 +80,7 @@ public class ChatUI {
                 chatStage.setTitle(name);
                 chatStage.setScene(scene);
             }
-            chatStage.show(); // Hiển thị cửa sổ `ChatUI`
+            chatStage.show();
         });
     }
 

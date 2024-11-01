@@ -34,10 +34,12 @@ public class MainServer {
     }
 
     public void startServer(ClientConnectionListener client) throws IOException {
+        int count = 0;
         while(true){
             System.out.println("Server đang chờ kết nối");
             //Socket cho cmd
             Socket clientSocket = serverSocket.accept();
+            count++;
             socketMap.put(clientSocket.getInetAddress().getHostAddress(), clientSocket);
 
             //Socket cho chat
@@ -45,13 +47,13 @@ public class MainServer {
             socketMapChat.put(clientSocketChat.getInetAddress().getHostAddress(), clientSocketChat);
             //Truyen dia chi ve cho client nhan
             PrintWriter wr = new PrintWriter(clientSocket.getOutputStream(), true);
-            wr.println(clientSocket.getInetAddress().getHostAddress());
+            wr.println(count);
 
             System.out.println("Client đã kết nối: " + clientSocket.getInetAddress().getHostName());
             if (client != null) {
                 client.onClientConnected(clientSocket.getInetAddress().getHostAddress());
             }
-            //new ClientHandler(clientSocket).start();
+
         }
     }
     public ReceivePacket getReceivePacket(){

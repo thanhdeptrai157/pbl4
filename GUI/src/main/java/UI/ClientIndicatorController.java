@@ -10,23 +10,24 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import org.Server.MainServer;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientIndicatorController {
     private volatile boolean isRunning = true;
     private ChatUI chatUI;
+    private int numClient;
     public void stopImageReceiving() {
         isRunning = false;
     }
@@ -43,18 +44,16 @@ public class ClientIndicatorController {
     @FXML
     private ImageView computerIcon;
     private PrintWriter writer;
-    public void initialize(String clientIP, ChatUI chatUI) throws IOException {
+    public void initialize(String clientIP, ChatUI chatUI, int numClient) throws IOException {
         clientLabel.setText("Client IP: " + clientIP);
         clientLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
-
-
+        this.numClient = numClient;
         writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
-        // Set action cho các button
         viewScreenButton.setOnAction(event -> {
             writer.println("view");
             new Thread(() -> {
                 try {
-                    openClientScreen(clientIP);
+                    openClientScreen(numClient);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -69,12 +68,11 @@ public class ClientIndicatorController {
             openChatWindow(clientIP, chatUI);
         });
     }
-    private void showImageInView(ImageView clientImageView, String clientIP) throws InterruptedException, IOException {
-        //System.out.println("server" + clientIP);
+    private void showImageInView(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
         isRunning = true;
         while (isRunning) {
             try {
-                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(clientIP);
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(numClient);
 
                 if (imageBytes != null) {
                     BufferedImage bufferedImage = null;
@@ -110,17 +108,17 @@ public class ClientIndicatorController {
             chatUI.launchChatUI("Server Chat with " + clientIP, 1);
         });
     }
-    private void openClientScreen(String clientIP) throws InterruptedException {
+    private void openClientScreen(int numClient) throws InterruptedException {
         Platform.runLater(() -> {
             Stage clientStage = new Stage();
             clientStage.setTitle("Client Screen");
 
             ImageView clientImageView = new ImageView();
+            clientImageView.setFocusTraversable(true);
             clientImageView.setFitWidth(1200);
             clientImageView.setFitHeight(680);
             clientImageView.setPreserveRatio(true);
 
-            // Create buttons
             Button mouseControl = new Button("Điều khiển");
             Button screenShot = new Button("Chụp màn hình");
             screenShot.setOnAction(event -> {
@@ -144,15 +142,45 @@ public class ClientIndicatorController {
             layout.getChildren().add(buttonBar);
             AnchorPane.setRightAnchor(buttonBar, 10.0);
             AnchorPane.setTopAnchor(buttonBar, 10.0);
-
             Scene scene = new Scene(layout, 1350, 680);
             clientStage.setScene(scene);
             clientStage.show();
-
-            // Thread to update the image
+            AtomicBoolean isActive = new AtomicBoolean(false);
+            mouseControl.setOnAction(event -> {
+                isActive.set(!isActive.get());
+                if(isActive.get()){
+                    clientImageView.setOnMouseMoved(e -> {
+                        double mouseX = e.getSceneX();
+                        double mouseY = e.getSceneY();
+                        String clickType = "none";
+                        writer.println("move " + mouseX + " " + mouseY + " " + clickType);
+                    });
+                    clientImageView.setOnMouseClicked(e -> {
+                        clientImageView.requestFocus();
+                        double mouseX = e.getSceneX();
+                        double mouseY = e.getSceneY();
+                        String clickType = "none";
+                        if(e.getButton() == MouseButton.PRIMARY){
+                            clickType = "left";
+                        } else if(e.getButton() == MouseButton.SECONDARY){
+                            clickType = "right";
+                        }
+                        writer.println("click " + mouseX + " " + mouseY + " " + clickType);
+                    });
+                    clientImageView.setOnKeyTyped(e -> {
+                        String character = e.getCharacter();
+                        writer.println("type " + character);
+                    });
+                }
+                else{
+                    clientImageView.setOnKeyTyped(null);
+                    clientImageView.setOnMouseMoved(null);
+                    clientImageView.setOnMouseClicked(null);
+                }
+            });
             Thread imageThread = new Thread(() -> {
                 try {
-                    showImageInView(clientImageView, clientIP);
+                    showImageInView(clientImageView, numClient);
                 } catch (InterruptedException e) {
                     System.out.println("Image update thread interrupted.");
                 } catch (IOException e) {
@@ -160,8 +188,6 @@ public class ClientIndicatorController {
                 }
             });
             imageThread.start();
-
-            // Close request event
             clientStage.setOnCloseRequest(event -> {
                 writer.println("notView");
                 stopImageReceiving();

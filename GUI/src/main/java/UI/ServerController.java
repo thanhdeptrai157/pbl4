@@ -32,19 +32,20 @@ public class ServerController implements ClientConnectionListener {
 private void addClientIndicator(String clientIP, ChatUI chatUI) {
     try {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/UI/ClientIndicator.fxml"));
-        Parent clientPane = loader.load();
-
-        ClientIndicatorController clientIndicatorController = loader.getController();
-        clientIndicatorController.initialize(clientIP, chatUI);
-
         double xOffset = 50 + (clientCounter % 3) * 400;
         double yOffset = 50 + (clientCounter / 3) * 300;
+        Parent clientPane = loader.load();
+        clientCounter++;
+        ClientIndicatorController clientIndicatorController = loader.getController();
+        clientIndicatorController.initialize(clientIP, chatUI, clientCounter);
+
+
 
         AnchorPane.setTopAnchor(clientPane, yOffset);
         AnchorPane.setLeftAnchor(clientPane, xOffset);
 
         mainLayout.getChildren().add(clientPane);
-        clientCounter++;
+
     } catch (IOException e) {
         e.printStackTrace();
     }
