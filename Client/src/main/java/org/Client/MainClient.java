@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import org.Network.ReceiverTransfer;
 import org.Network.SendData;
 
 public class MainClient {
@@ -26,6 +28,7 @@ public class MainClient {
     private boolean isConnected;
     private Socket cmdSocket;
     private Socket chatSocket;
+    private Socket fileSocket;
     private int numberClient;
     private ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -34,6 +37,7 @@ public class MainClient {
         try {
             cmdSocket = new Socket(url, port);
             chatSocket = new Socket(url, 5003);
+            fileSocket = new Socket(url, 5004);
             //lưu số do Server gửi về để truyền ảnh
             BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
             String s = br.readLine();
@@ -43,6 +47,7 @@ public class MainClient {
             isConnected = false;
             throw new RuntimeException(e);
         }
+        getFile();
     }
 
     public Socket getSocketCmd() {
@@ -157,7 +162,26 @@ public class MainClient {
             executorService.shutdownNow();
         }
     }
+    public void getFile(){
+        String filePathReceive = "Client\\files\\";
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
 
+                ReceiverTransfer receiveFile = new ReceiverTransfer(filePathReceive, fileSocket);
+                receiveFile.start();
+                try {
+                    receiveFile.join(); // Đợi quá trình nhận file hoàn tất trước khi lắng nghe file tiếp theo
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
     public Socket getChatSocket() {
         return chatSocket;
     }

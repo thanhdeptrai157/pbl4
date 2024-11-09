@@ -62,7 +62,7 @@ public class TransferServer extends JFrame implements ActionListener {
     public static void main(String[] args) throws IOException, InterruptedException {
         new TransferServer("Server");
 
-        String filePathReceive = "E:\\DuAnTruongHoc\\Ky5\\TransferFile\\FileServerReceive\\";
+        String filePathReceive = "filestranfer\\";
 
         while(true){
             Thread.sleep(200);
@@ -87,9 +87,7 @@ public class TransferServer extends JFrame implements ActionListener {
                 }
             }
         }).start();
-
     }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnChoose) {

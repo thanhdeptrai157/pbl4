@@ -18,7 +18,7 @@ public class TransferClient extends JFrame implements ActionListener {
     public JButton btnConnect,btnChoose,btnSend;
     public File selectedFile;
     public static Socket socket;
-    public static String filePathReceive = "E:\\DuAnTruongHoc\\Ky5\\TransferFile\\FileClientReceive\\";
+    public static String filePathReceive = "filestranfer\\";
     public static  boolean isConnected = false;
     public void GUI(){
 
@@ -100,30 +100,7 @@ public class TransferClient extends JFrame implements ActionListener {
                 }
             }
         }).start();
-
-
     }
-
-//    public   void getFileTransfer( String ipServer,int PortServer){
-//        String filePathReceive = "E:\\DuAnTruongHoc\\Ky5\\TransferFile\\FileClientReceive\\";
-//
-//        try {
-//            socket = new Socket(ipServer, PortServer);
-//            System.out.println("Connected to server. Listening for files...");
-//
-//            // Keep listening for incoming files as long as the socket is open.
-//            while (!socket.isClosed()) {
-//                ReceiveFile receiveFile = new ReceiveFile(filePathReceive, socket);
-//                receiveFile.start();
-//                receiveFile.join(); // Wait for the file transfer to complete.
-//            }
-//        } catch (Exception e) {
-//            System.out.println("Error from client: " + e.getMessage());
-//        }
-//    }
-
-
-
 
     @Override
     public void actionPerformed(ActionEvent e) {

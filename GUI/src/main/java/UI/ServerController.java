@@ -3,10 +3,15 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.Network.SenderTransfer;
 import org.Server.ClientConnectionListener;
 import org.Server.MainServer;
 import java.io.*;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,8 +20,11 @@ public class ServerController implements ClientConnectionListener {
 
     @FXML
     private AnchorPane mainLayout;
+    @FXML
+    private Button sendAssignmentButton;
     private ChatUI chatUI;
     private final Map<String, ChatUI> clientChats = new HashMap<>();
+    private File selectedFile;
     private int clientCounter = 0;
     @FXML
     public void initialize() throws IOException {
@@ -28,6 +36,33 @@ public class ServerController implements ClientConnectionListener {
                 throw new RuntimeException(e);
             }
         }).start();
+    }
+    @FXML
+    private void handleSendAssignment() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Chọn tệp bài tập");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Tất cả các tệp", "*.*"),
+                new FileChooser.ExtensionFilter("Tệp văn bản", "*.txt", "*.pdf", "*.docx")
+        );
+        Stage stage = (Stage) sendAssignmentButton.getScene().getWindow();
+        selectedFile = fileChooser.showOpenDialog(stage);
+        if (selectedFile != null) {
+            System.out.println("Đã chọn tệp: " + selectedFile.getAbsolutePath());
+            for(Socket socket : MainServer.getInstance().getSocketMapFile().values() ) {
+                SenderTransfer senderFile = new SenderTransfer(selectedFile, socket);
+                senderFile.start();
+                try {
+                    senderFile.join();
+                    System.out.println("Đã gửi file: " + selectedFile.getName());
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+        } else {
+            System.out.println("Không có tệp nào được chọn.");
+        }
     }
 private void addClientIndicator(String clientIP, ChatUI chatUI) {
     try {

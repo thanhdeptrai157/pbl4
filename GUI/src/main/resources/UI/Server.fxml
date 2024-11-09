@@ -8,7 +8,7 @@
    <children>
       <AnchorPane layoutX="1.0" prefHeight="780.0" prefWidth="225.0" styleClass="anchor-pane-sidebar">
          <children>
-            <Button layoutX="27.0" layoutY="226.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Gửi bài tập" />
+            <Button fx:id="sendAssignmentButton" layoutX="27.0" layoutY="226.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Gửi bài tập" onAction="#handleSendAssignment" />
             <Button layoutX="27.0" layoutY="299.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Gửi thông báo" />
             <Button layoutX="27.0" layoutY="373.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Khoá máy tất cả" />
             <Button layoutX="27.0" layoutY="443.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="170.0" text="Chụp màn hình tất cả" />
