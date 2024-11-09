@@ -73,7 +73,6 @@ public class ClientIndicatorController {
         while (isRunning) {
             try {
                 byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(numClient);
-
                 if (imageBytes != null) {
                     BufferedImage bufferedImage = null;
                     ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
@@ -167,9 +166,17 @@ public class ClientIndicatorController {
                         }
                         writer.println("click " + mouseX + " " + mouseY + " " + clickType);
                     });
-                    clientImageView.setOnKeyTyped(e -> {
-                        String character = e.getCharacter();
-                        writer.println("type " + character);
+                    clientImageView.setOnKeyPressed(e -> {
+                        int keyCode = e.getCode().getCode();
+                        boolean shift = e.isShiftDown();
+                        boolean ctrl = e.isControlDown();
+                        boolean alt = e.isAltDown();
+                        writer.println("type " + keyCode + " " + shift + " " + ctrl + " " + alt);
+                    });
+                    clientImageView.setOnScroll(e->{
+                        int delta = (int) e.getDeltaY();
+                        System.out.println(delta);
+                        writer.println("scroll " + delta);
                     });
                 }
                 else{

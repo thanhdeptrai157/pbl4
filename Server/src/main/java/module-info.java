@@ -1,8 +1,7 @@
 module Server {
     requires java.sql;
-    requires Network;
     requires javafx.graphics;
-    requires java.desktop;
+    requires Network;
     exports org.Server;
 
 }

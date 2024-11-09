@@ -40,7 +40,6 @@ private void addClientIndicator(String clientIP, ChatUI chatUI) {
         clientIndicatorController.initialize(clientIP, chatUI, clientCounter);
 
 
-
         AnchorPane.setTopAnchor(clientPane, yOffset);
         AnchorPane.setLeftAnchor(clientPane, xOffset);
 

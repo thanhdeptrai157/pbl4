@@ -1,15 +1,11 @@
 package org.Client;
 
-import org.Network.SendData;
-
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -18,10 +14,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
+import org.Network.SendData;
 
 public class MainClient {
     private Thread view;
@@ -56,16 +53,15 @@ public class MainClient {
         return isConnected;
     }
     public void commandFromServer() throws IOException, InterruptedException, AWTException {
-        System.out.println("Command listener started.");
         cmdSocket.setSoTimeout(1000);
         BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
         Robot robot = new Robot();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         while (true) {
             try {
-                String s = br.readLine();
-                if (s != null) {
-                    switch (s.trim()) {
+                String command = br.readLine();
+                if (command != null) {
+                    switch (command.trim()) {
                         case "view":
                             if (view == null || !view.isAlive()) {
                                 view = new Thread(() -> {
@@ -98,15 +94,14 @@ public class MainClient {
                             shutdownExecutor();
                             return;
                         default:
-
-                            String[] s1 = s.split(" ");
-                            String event = s1[0];
+                            String[] commandSplit = command.split(" ");
+                            String event = commandSplit[0];
                             if (event.equals("move")) {
-                                double x = Double.parseDouble(s1[1]) * screenSize.getWidth() / 1200;
-                                double y = Double.parseDouble(s1[2]) * screenSize.getHeight() / 680;
+                                double x = Double.parseDouble(commandSplit[1]) * screenSize.getWidth() / 1200;
+                                double y = Double.parseDouble(commandSplit[2]) * screenSize.getHeight() / 680;
                                 robot.mouseMove((int) x, (int) y);
                             } else if (event.equals("click")) {
-                                String clickType = s1[3];
+                                String clickType = commandSplit[3];
                                 if (clickType.equals("left")) {
                                     robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                                     robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
@@ -115,15 +110,27 @@ public class MainClient {
                                     robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
                                 }
                             } else if (event.equals("type")) {
+                                System.out.println(command);
+                                int keyCode = Integer.parseInt(commandSplit[1]);
+                                boolean isShiftPress = Boolean.parseBoolean(commandSplit[2]);
+                                boolean isCtrlPress = Boolean.parseBoolean(commandSplit[3]);
+                                boolean isAltPress = Boolean.parseBoolean(commandSplit[4]);
+                                if (isShiftPress) robot.keyPress(KeyEvent.VK_SHIFT);
+                                if (isCtrlPress) robot.keyPress(KeyEvent.VK_CONTROL);
+                                if (isAltPress) robot.keyPress(KeyEvent.VK_ALT);
+                                if(keyCode != 0 && keyCode != 16 && keyCode!= 18 && keyCode != 17){
+                                    robot.keyPress(keyCode);
+                                    robot.keyRelease(keyCode);
+                                }
+                                if(isShiftPress) robot.keyRelease(KeyEvent.VK_SHIFT);
+                                if(isCtrlPress) robot.keyRelease(KeyEvent.VK_CONTROL);
+                                if(isAltPress) robot.keyRelease(KeyEvent.VK_ALT);
+                                System.out.println(keyCode);
 
-                                String character = s1[1];
-                                StringSelection stringSelection = new StringSelection(character);
-                                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                                clipboard.setContents(stringSelection, null);
-                                robot.keyPress(KeyEvent.VK_CONTROL);
-                                robot.keyPress(KeyEvent.VK_V);
-                                robot.keyRelease(KeyEvent.VK_V);
-                                robot.keyRelease(KeyEvent.VK_CONTROL);
+                            }
+                            else if(event.equals("scroll")){
+                                int delta = Integer.parseInt(commandSplit[1]);
+                                robot.mouseWheel(delta);
                             }
                             break;
                     }
@@ -131,7 +138,7 @@ public class MainClient {
                     System.out.println("Server disconnected.");
                     break;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 if (!(e instanceof java.net.SocketTimeoutException)) {
                     e.printStackTrace();
                     break;
@@ -179,14 +186,13 @@ public class MainClient {
                 ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
                 ImageWriteParam param = writer.getDefaultWriteParam();
                 param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionQuality(0.5f);
+                param.setCompressionQuality(0.3f);
                 writer.setOutput(new MemoryCacheImageOutputStream(baos));
                 writer.write(null, new IIOImage(screenShot, null, null), param);
                 writer.dispose();
-
                 imageInBytes = baos.toByteArray();
                 baos.close();
-
+                Thread.sleep(10);
             } catch (Exception e) {
                 System.out.println("Error MainClient  : " + e.getMessage());
                 break;

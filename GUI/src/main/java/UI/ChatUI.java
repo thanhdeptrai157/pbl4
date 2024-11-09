@@ -53,8 +53,6 @@ public class ChatUI {
                         messageInput.clear();
                     }
                 });
-
-
                 chatStage.setOnCloseRequest(event -> {
                     event.consume();
                     chatStage.hide();
