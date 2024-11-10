@@ -9,14 +9,14 @@ import java.util.Map;
 import org.Network.*;
 
 public class MainServer {
-    private ServerSocket serverSocket;
-    private ServerSocket serverSocketChat;
-    private ServerSocket serverTransFiles;
-    private Map<String, Socket> socketMap = new HashMap<>();
-    private Map<String, Socket> socketMapChat = new HashMap<>();
-    private Map<String, Socket> socketMapFile= new HashMap<>();
+    private final ServerSocket serverSocket;
+    private final ServerSocket serverSocketChat;
+    private final ServerSocket serverTransFiles;
+    private final Map<String, Socket> socketMap = new HashMap<>();
+    private final Map<String, Socket> socketMapChat = new HashMap<>();
+    private final Map<String, Socket> socketMapFile= new HashMap<>();
     private static MainServer instance = null;
-    private ReceivePacket receivePacket;
+    private final ReceivePacket receivePacket;
     public static MainServer getInstance() throws IOException {
         if(instance == null){
             synchronized (MainServer.class){

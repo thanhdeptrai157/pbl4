@@ -24,13 +24,13 @@ import org.Network.SendData;
 
 public class MainClient {
     private Thread view;
-    private String ipServer;
+    private final String ipServer;
     private boolean isConnected;
-    private Socket cmdSocket;
-    private Socket chatSocket;
-    private Socket fileSocket;
-    private int numberClient;
-    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private final Socket cmdSocket;
+    private final Socket chatSocket;
+    private final Socket fileSocket;
+    private final int numberClient;
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     public MainClient(String url, int port) {
         ipServer = url;
@@ -53,7 +53,9 @@ public class MainClient {
     public Socket getSocketCmd() {
         return cmdSocket;
     }
-
+    public Socket getFileSocket(){
+        return fileSocket;
+    }
     public boolean isConnected() {
         return isConnected;
     }
@@ -131,7 +133,6 @@ public class MainClient {
                                 if(isCtrlPress) robot.keyRelease(KeyEvent.VK_CONTROL);
                                 if(isAltPress) robot.keyRelease(KeyEvent.VK_ALT);
                                 System.out.println(keyCode);
-
                             }
                             else if(event.equals("scroll")){
                                 int delta = Integer.parseInt(commandSplit[1]);
@@ -163,7 +164,7 @@ public class MainClient {
         }
     }
     public void getFile(){
-        String filePathReceive = "Client\\files\\";
+        String filePathReceive = "Client/files/";
         new Thread(() -> {
             while (true) {
                 try {
@@ -171,7 +172,6 @@ public class MainClient {
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
-
                 ReceiverTransfer receiveFile = new ReceiverTransfer(filePathReceive, fileSocket);
                 receiveFile.start();
                 try {

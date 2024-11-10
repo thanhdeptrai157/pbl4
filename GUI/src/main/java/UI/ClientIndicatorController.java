@@ -15,6 +15,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import org.Network.ReceiverTransfer;
 import org.Server.MainServer;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,11 +23,11 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientIndicatorController {
     private volatile boolean isRunning = true;
-    private ChatUI chatUI;
     private int numClient;
     public void stopImageReceiving() {
         isRunning = false;
@@ -67,6 +68,28 @@ public class ClientIndicatorController {
         messageButton.setOnAction(event -> {
             openChatWindow(clientIP, chatUI);
         });
+        String filePathReceive =  "/pbl4/Server/files/";
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                ReceiverTransfer receiveFile = null;
+                try {
+                    receiveFile = new ReceiverTransfer(filePathReceive, MainServer.getInstance().getSocketMapFile().get(clientIP));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                receiveFile.start();
+                try {
+                    receiveFile.join(); // Đợi quá trình nhận file hoàn tất trước khi lắng nghe file tiếp theo
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
     private void showImageInView(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
         isRunning = true;

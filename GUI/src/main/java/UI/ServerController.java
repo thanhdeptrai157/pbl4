@@ -22,13 +22,11 @@ public class ServerController implements ClientConnectionListener {
     private AnchorPane mainLayout;
     @FXML
     private Button sendAssignmentButton;
-    private ChatUI chatUI;
     private final Map<String, ChatUI> clientChats = new HashMap<>();
     private File selectedFile;
     private int clientCounter = 0;
     @FXML
     public void initialize() throws IOException {
-        chatUI = new ChatUI();
         new Thread(() -> {
             try {
                 MainServer.getInstance().startServer(this);
