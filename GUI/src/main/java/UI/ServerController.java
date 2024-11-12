@@ -2,9 +2,13 @@ package UI;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.Network.SenderTransfer;
@@ -97,5 +101,32 @@ private void addClientIndicator(String clientIP, ChatUI chatUI) {
             }
             addClientIndicator(clientIP, chatUI);
         });
+    }
+
+    public void handleSendToastMessage() {
+        Stage message = new Stage();
+        message.setTitle("Nhap thong bao");
+
+        TextField textfield = new TextField();
+        Button send = new Button("Gửi");
+        send.setOnAction(event->{
+            String mes = textfield.getText();
+            try {
+                for(Socket socket : MainServer.getInstance().getSocketMap().values()){
+                    PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+                    writer.println("Mess: " + mes);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(textfield, send);
+        layout.setAlignment(Pos.CENTER);
+
+
+        Scene scene = new Scene(layout, 300, 150);
+        message.setScene(scene);
+        message.show();
     }
 }

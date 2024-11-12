@@ -30,7 +30,8 @@ public class ClientController {
 
         String ip = ipField.getText().trim();
         int port = Integer.parseInt(portField.getText().trim());
-        client = new MainClient(ip, port);
+        Stage currentStage = (Stage) pane.getScene().getWindow();
+        client = new MainClient(ip, port, stage);
         chatUI = new ChatUI();
         if(client.isConnected()){
             chatUI.setSocket(client.getChatSocket());
@@ -45,7 +46,7 @@ public class ClientController {
                     throw new RuntimeException(e);
                 }
             }).start();
-            Stage currentStage = (Stage) pane.getScene().getWindow();
+
             currentStage.close();
             openClientManage();
         }
@@ -70,7 +71,7 @@ public class ClientController {
                 ClientManagerController controller = loader.getController();
                 controller.initialize(chatUI, client.getFileSocket());
                 stage.show();
-
+                client.setStage(stage);
             }
             catch (Exception e){
                 e.printStackTrace();

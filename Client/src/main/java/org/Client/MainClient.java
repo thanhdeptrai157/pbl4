@@ -14,11 +14,21 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.Network.ReceiverTransfer;
 import org.Network.SendData;
 
@@ -31,9 +41,10 @@ public class MainClient {
     private final Socket fileSocket;
     private final int numberClient;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
-
-    public MainClient(String url, int port) {
+    private Stage stage;
+    public MainClient(String url, int port, Stage stage) {
         ipServer = url;
+        this.stage = stage;
         try {
             cmdSocket = new Socket(url, port);
             chatSocket = new Socket(url, 5003);
@@ -49,7 +60,9 @@ public class MainClient {
         }
         getFile();
     }
-
+    public void setStage(Stage stage){
+        this.stage = stage;
+    }
     public Socket getSocketCmd() {
         return cmdSocket;
     }
@@ -79,13 +92,14 @@ public class MainClient {
                                     }
                                 });
                                 view.start();
+
                             }
+                            showToast(stage, "Share màn hình");
                             break;
 
                         case "lock":
                             executorService.submit(this::lockScreen);
                             break;
-
                         case "notView":
                             if (view != null && view.isAlive()) {
                                 view.interrupt();
@@ -137,6 +151,8 @@ public class MainClient {
                             else if(event.equals("scroll")){
                                 int delta = Integer.parseInt(commandSplit[1]);
                                 robot.mouseWheel(delta);
+                            } else if (event.equals("Mess:")) {
+                                showToast(stage, command);
                             }
                             break;
                     }
@@ -152,7 +168,39 @@ public class MainClient {
             }
         }
     }
+    public void showToast(Stage Stage, String message) {
+        Platform.runLater(()->{
+            Popup popup = new Popup();
+            popup.setAutoHide(true);
+            Text text = new Text(message);
+            text.setFill(Color.WHITE);
+            text.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
+
+            HBox hBox = new HBox(text);
+            hBox.setStyle("-fx-background-color: #323232; -fx-padding: 15px; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 5);");
+
+
+            StackPane pane = new StackPane(hBox);
+            pane.setStyle("-fx-background-color: transparent;");
+            popup.getContent().add(pane);
+
+            popup.show(Stage, Stage.getX() + Stage.getWidth() / 2 - 150, Stage.getY() + 50);
+            TranslateTransition slideIn = new TranslateTransition(Duration.millis(300), hBox);
+            slideIn.setFromY(-50);
+            slideIn.setToY(0);
+            slideIn.play();
+            PauseTransition delay = new PauseTransition(Duration.seconds(3));
+            delay.setOnFinished(event -> {
+                FadeTransition fadeOut = new FadeTransition(Duration.millis(500), hBox);
+                fadeOut.setFromValue(1.0);
+                fadeOut.setToValue(0.0);
+                fadeOut.setOnFinished(e -> popup.hide());
+                fadeOut.play();
+            });
+            delay.play();
+        });
+    }
     private void shutdownExecutor() {
         executorService.shutdown();
         try {
