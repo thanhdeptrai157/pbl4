@@ -1,14 +1,15 @@
 package org.Server.HistoryWeb;
 
-import java.net.InetSocketAddress;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import java.net.InetSocketAddress;
+
 public class HistoryWeb extends WebSocketServer {
 
-    public App(int port) {
+    public HistoryWeb(int port) {
         super(new InetSocketAddress(port));
     }
 
@@ -25,7 +26,7 @@ public class HistoryWeb extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println("Nhận được tin nhắn: " + message);
-        
+
         // Xử lý dữ liệu JSON (URL đã được gửi từ trình duyệt)
         System.out.println("URL đã truy cập: " + message);
     }
@@ -41,9 +42,8 @@ public class HistoryWeb extends WebSocketServer {
     }
 
     public static void main(String[] args) {
-        App server = new App(5000);
+        HistoryWeb server = new HistoryWeb(5000);
         server.start();
         System.out.println("WebSocket server đang chạy trên cổng 5000...");
     }
 }
-
