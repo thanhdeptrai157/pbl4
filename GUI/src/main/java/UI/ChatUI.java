@@ -1,12 +1,15 @@
 package UI;
 
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.Network.Encode;
 
@@ -21,7 +24,7 @@ public class ChatUI {
     private PrintWriter writer;
     private BufferedReader in;
     private Stage chatStage;
-    private ListView<String> chatWindow;
+    private ListView<Pane> chatWindow; // Sử dụng Pane thay vì HBox để căn chỉnh toàn bộ tin nhắn
     private TextField messageInput;
 
     public ChatUI() {
@@ -44,7 +47,7 @@ public class ChatUI {
                 sendButton.setOnAction(e -> {
                     String message = messageInput.getText();
                     if (!message.isEmpty()) {
-                        chatWindow.getItems().add("You: " + message);
+                        displayMessage("You: " + message, Pos.BASELINE_RIGHT);
                         try {
                             writer.println(Encode.encode(message));
                         } catch (Exception ex) {
@@ -57,12 +60,13 @@ public class ChatUI {
                     event.consume();
                     chatStage.hide();
                 });
+
                 new Thread(() -> {
                     String message;
                     try {
                         while (!Thread.currentThread().isInterrupted() && (message = in.readLine()) != null) {
                             String finalMessage = Encode.decode(message);
-                            Platform.runLater(() -> chatWindow.getItems().add(id == 1? "Client: "+ finalMessage : "Server: " + finalMessage));
+                            Platform.runLater(() -> displayMessage(id == 1 ? "Client: " + finalMessage : "Server: " + finalMessage, Pos.BASELINE_LEFT));
                         }
                     } catch (IOException e) {
                         System.out.println("Error receiving message: " + e.getMessage());
@@ -82,6 +86,32 @@ public class ChatUI {
         });
     }
 
+    private void displayMessage(String message, Pos position) {
+        HBox messageBox = new HBox();
+
+        Text text = new Text(message);
+        text.wrappingWidthProperty().bind(chatWindow.widthProperty().subtract(100));
+        messageBox.getChildren().add(text);
+
+        // Đặt màu nền cho tin nhắn theo vị trí
+        if (position == Pos.BASELINE_RIGHT) {
+            messageBox.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 10; -fx-background-radius: 10;");
+        } else {
+            messageBox.setStyle("-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-background-radius: 10;");
+        }
+
+        Pane pane = new Pane(messageBox);  // Đặt HBox trong một Pane để kiểm soát vị trí
+        if (position == Pos.BASELINE_RIGHT) {
+            pane.setMaxWidth(Double.MAX_VALUE);
+            messageBox.setAlignment(Pos.BASELINE_RIGHT);
+            messageBox.setLayoutX(pane.getWidth() - messageBox.getWidth()); // Đẩy sát về bên phải
+        } else {
+            messageBox.setAlignment(Pos.BASELINE_LEFT);
+        }
+
+        chatWindow.getItems().add(pane);
+    }
+
     public void setSocket(Socket socket) throws IOException {
         this.socket = socket;
         if (writer == null) {
@@ -91,6 +121,7 @@ public class ChatUI {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         }
     }
+
     public Socket getSocket(){
         return socket;
     }

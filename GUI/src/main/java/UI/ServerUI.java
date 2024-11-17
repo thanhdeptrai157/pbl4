@@ -17,6 +17,7 @@ public class ServerUI extends Application {
         primaryStage.setResizable(false);
         primaryStage.setTitle("Server Chao Xin!");
         primaryStage.show();
+
     }
     public static void main(String [] args){
         launch(args);

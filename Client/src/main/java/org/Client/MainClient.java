@@ -9,18 +9,12 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -42,14 +36,14 @@ public class MainClient {
     private final int numberClient;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
     private Stage stage;
-    public MainClient(String url, int port, Stage stage) {
+    public MainClient(String url, int port,Stage stage) {
         ipServer = url;
+
         this.stage = stage;
         try {
             cmdSocket = new Socket(url, port);
             chatSocket = new Socket(url, 5003);
             fileSocket = new Socket(url, 5004);
-            //lưu số do Server gửi về để truyền ảnh
             BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
             String s = br.readLine();
             numberClient = Integer.parseInt(s);
@@ -72,6 +66,8 @@ public class MainClient {
     public boolean isConnected() {
         return isConnected;
     }
+
+
     public void commandFromServer() throws IOException, InterruptedException, AWTException {
         cmdSocket.setSoTimeout(1000);
         BufferedReader br = new BufferedReader(new InputStreamReader(cmdSocket.getInputStream()));
@@ -106,7 +102,14 @@ public class MainClient {
                                 System.out.println("View thread stopped.");
                             }
                             break;
-
+                        case "history":
+                            int count = 20;
+                            PrintWriter printWriter = new PrintWriter(cmdSocket.getOutputStream(), true);
+                            printWriter.println(count);
+                            for(History s : HistoryWeb.getHistoryWeb(count)){
+                                printWriter.println(s.getDate() +"$"+ s.getUrl());
+                            }
+                            break;
                         case "exit":
                             System.out.println("Exiting command loop.");
                             if (view != null && view.isAlive()) {
@@ -223,7 +226,7 @@ public class MainClient {
                 ReceiverTransfer receiveFile = new ReceiverTransfer(filePathReceive, fileSocket);
                 receiveFile.start();
                 try {
-                    receiveFile.join(); // Đợi quá trình nhận file hoàn tất trước khi lắng nghe file tiếp theo
+                    receiveFile.join();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -234,12 +237,12 @@ public class MainClient {
         return chatSocket;
     }
 
-    public void lockScreen() {
-        String command = "rundll32.exe user32.dll,LockWorkStation";
-        try {
-            Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void lockScreen()  {
+        try{
+            LockScreen.lockScreen();
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 

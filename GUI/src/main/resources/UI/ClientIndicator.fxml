@@ -12,7 +12,7 @@
 
 <StackPane fx:id="clientPane" prefHeight="231.0" prefWidth="351.0" styleClass="layout" stylesheets="@../Style/clientIndicator.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.ClientIndicatorController">
     <Rectangle fx:id="clientIndicator" arcHeight="10" arcWidth="10" height="250" styleClass="rec" width="350" />
-    <VBox prefHeight="309.0" prefWidth="351.0">
+    <VBox prefHeight="370.0" prefWidth="351.0">
         <padding>
             <Insets bottom="20" left="20" right="20" top="20" />
         </padding>
@@ -29,12 +29,14 @@
 
                 <Button fx:id="messageButton" prefHeight="37.0" prefWidth="160" text="Chat" />
 
+                <Button fx:id="viewHistoryButton" prefHeight="37.0" prefWidth="160" text="Xem lịch sử" />
+
             </VBox>
             <ImageView fx:id="computerIcon" fitHeight="123.0" fitWidth="125.0">
-            <image>
-               <Image url="@../Style/cmp.jpg" />
-            </image>
-         </ImageView>
+                <image>
+                    <Image url="@../Style/cmp.jpg" />
+                </image>
+            </ImageView>
         </HBox>
     </VBox>
 

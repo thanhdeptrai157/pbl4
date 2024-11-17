@@ -28,8 +28,10 @@ public class ClientController {
 
     public void onConnectButton () throws IOException {
 
-        String ip = ipField.getText().trim();
-        int port = Integer.parseInt(portField.getText().trim());
+//        String ip = ipField.getText().trim();
+//        int port = Integer.parseInt(portField.getText().trim());
+        String ip = "localhost";
+        int port = 5001;
         Stage currentStage = (Stage) pane.getScene().getWindow();
         client = new MainClient(ip, port, stage);
         chatUI = new ChatUI();
@@ -47,7 +49,7 @@ public class ClientController {
                 }
             }).start();
 
-            currentStage.close();
+//            currentStage.close();
             openClientManage();
         }
         else{
@@ -66,7 +68,7 @@ public class ClientController {
                 stage.setAlwaysOnTop(true);
                 stage.initStyle(StageStyle.UNDECORATED);
                 stage.setX(Toolkit.getDefaultToolkit().getScreenSize().getWidth() - 240);
-                stage.setY(Toolkit.getDefaultToolkit().getScreenSize().getHeight()- 80);
+                stage.setY(Toolkit.getDefaultToolkit().getScreenSize().getHeight()- 120);
 
                 ClientManagerController controller = loader.getController();
                 controller.initialize(chatUI, client.getFileSocket());

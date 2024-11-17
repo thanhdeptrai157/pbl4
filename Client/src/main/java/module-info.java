@@ -5,5 +5,6 @@ module Client {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.media;
-
+    requires com.sun.jna;
+    requires com.sun.jna.platform;
 }

@@ -1,28 +1,31 @@
 package UI;
 
+
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import kotlin.Pair;
 import org.Network.ReceiverTransfer;
 import org.Server.MainServer;
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientIndicatorController {
@@ -42,12 +45,17 @@ public class ClientIndicatorController {
     @FXML
     private Button messageButton;
     @FXML
+    private Button viewHistoryButton;
+    @FXML
     private ImageView computerIcon;
     private PrintWriter writer;
+    private BufferedReader reader;
+    private Thread historyThread;
     public void initialize(String clientIP, ChatUI chatUI, int numClient) throws IOException {
         clientLabel.setText("Client IP: " + clientIP);
         clientLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
         this.numClient = numClient;
+        reader = new BufferedReader(new InputStreamReader(MainServer.getInstance().getSocketMap().get(clientIP).getInputStream()));
         writer = new PrintWriter(MainServer.getInstance().getSocketMap().get(clientIP).getOutputStream(), true);
         viewScreenButton.setOnAction(event -> {
             writer.println("view");
@@ -59,7 +67,10 @@ public class ClientIndicatorController {
                 }
             }).start();
         });
-
+        viewHistoryButton.setOnAction(event -> {
+            writer.println("history");
+            openListViewHistory();
+        });
         lockScreenButton.setOnAction(event -> {
             writer.println("lock");
         });
@@ -83,7 +94,7 @@ public class ClientIndicatorController {
                 }
                 receiveFile.start();
                 try {
-                    receiveFile.join(); // Đợi quá trình nhận file hoàn tất trước khi lắng nghe file tiếp theo
+                    receiveFile.join();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -124,11 +135,91 @@ public class ClientIndicatorController {
             }
         }
     }
+
+    private void openListViewHistory() {
+        Platform.runLater(() -> {
+            Stage stage = new Stage();
+            stage.setWidth(900);
+            stage.setTitle("History of Client");
+            TableView<Pair<String, String>> tableView = new TableView<>();
+            TableColumn<Pair<String, String>, String> dateColumn = new TableColumn<>("Date");
+            dateColumn.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(cellData.getValue().getFirst()));
+            TableColumn<Pair<String, String>, String> urlColumn = new TableColumn<>("URL");
+            urlColumn.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(cellData.getValue().getSecond()));
+            tableView.getColumns().add(dateColumn);
+            tableView.getColumns().add(urlColumn);
+            dateColumn.setPrefWidth(100);
+            urlColumn.setPrefWidth(800);
+            stage.setResizable(false);
+            urlColumn.setCellFactory(param -> {
+                TableCell<Pair<String, String>, String> cell = new TableCell<Pair<String, String>, String>() {
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setText(null);
+                        } else {
+                            setText(item);
+                        }
+                    }
+                };
+
+                cell.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+                    if (!cell.isEmpty() && event.getClickCount() == 2) {
+                        String url = cell.getItem();
+                        try {
+                            Desktop.getDesktop().browse(new URI(url));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                return cell;
+            });
+            int totalLine;
+            try {
+                totalLine = Integer.parseInt(reader.readLine());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            historyThread = new Thread(() -> {
+                try {
+                    String history[] = null;
+                    for(int i = 0; i < totalLine; i++) {
+                        if (Thread.interrupted()) {
+                            System.out.println("Thread interrupted");
+                            break;
+                        }
+                        history = reader.readLine().split("\\$");
+                        final Pair<String, String> itemHistory = new Pair<>(history[0], history[1]);
+                        Platform.runLater(() -> tableView.getItems().add(itemHistory));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+            historyThread.start();
+            stage.setOnCloseRequest(event -> {
+                if (historyThread != null && historyThread.isAlive()) {
+                    historyThread.interrupt();
+                }
+            });
+            Scene scene = new Scene(tableView, 600, 400);
+            stage.setScene(scene);
+            stage.show();
+        });
+    }
+
+
     private void openChatWindow(String clientIP, ChatUI chatUI) {
         Platform.runLater(() -> {
             chatUI.launchChatUI("Server Chat with " + clientIP, 1);
         });
     }
+
     private void openClientScreen(int numClient) throws InterruptedException {
         Platform.runLater(() -> {
             Stage clientStage = new Stage();
