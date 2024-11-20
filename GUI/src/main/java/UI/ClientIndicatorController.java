@@ -78,7 +78,8 @@ public class ClientIndicatorController {
         messageButton.setOnAction(event -> {
             openChatWindow(clientIP, chatUI);
         });
-        String filePathReceive =  "/pbl4/Server/files/";
+        //String filePathReceive =  "/pbl4/Server/files/";
+        String filePathReceive =  "Server/files/";
         new Thread(() -> {
             while (true) {
                 try {

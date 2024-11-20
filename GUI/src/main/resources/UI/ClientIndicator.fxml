@@ -17,22 +17,22 @@
             <Insets bottom="20" left="20" right="20" top="20" />
         </padding>
         <HBox alignment="CENTER" prefHeight="42.0" prefWidth="311.0" spacing="10">
-            <Label fx:id="clientLabel" style="-fx-font-size: 18; -fx-font-weight: bold;" textFill="BLACK" />
+            <Label fx:id="clientLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" textFill="BLACK" />
         </HBox>
         <HBox alignment="CENTER_LEFT" prefHeight="150.0" prefWidth="300.0" spacing="10">
 
-            <VBox prefHeight="119.0" prefWidth="160.0" spacing="10">
+            <VBox prefHeight="119.0" prefWidth="160.0" spacing="15">
 
-                <Button fx:id="viewScreenButton" prefHeight="42.0" prefWidth="160" text="Xem màn hình" />
+                <Button fx:id="viewScreenButton" prefHeight="35.0" prefWidth="160" text="Xem màn hình" />
 
-                <Button fx:id="lockScreenButton" prefHeight="40.0" prefWidth="160" text="Lock màn hình" />
+                <Button fx:id="lockScreenButton" prefHeight="35.0" prefWidth="160" text="Lock màn hình" />
 
-                <Button fx:id="messageButton" prefHeight="37.0" prefWidth="160" text="Chat" />
+                <Button fx:id="messageButton" prefHeight="35.0" prefWidth="160" text="Chat" />
 
-                <Button fx:id="viewHistoryButton" prefHeight="37.0" prefWidth="160" text="Xem lịch sử" />
+                <Button fx:id="viewHistoryButton" prefHeight="35.0" prefWidth="160" text="Xem lịch sử" />
 
             </VBox>
-            <ImageView fx:id="computerIcon" fitHeight="123.0" fitWidth="125.0">
+            <ImageView fx:id="computerIcon" fitHeight="170.0" fitWidth="150.0">
                 <image>
                     <Image url="@../Style/cmp.jpg" />
                 </image>

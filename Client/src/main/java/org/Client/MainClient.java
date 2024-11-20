@@ -16,6 +16,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import javafx.animation.*;
 import javafx.application.Platform;
+
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -94,6 +97,7 @@ public class MainClient {
                             break;
 
                         case "lock":
+                        case "lockall":
                             executorService.submit(this::lockScreen);
                             break;
                         case "notView":
@@ -103,13 +107,14 @@ public class MainClient {
                             }
                             break;
                         case "history":
-                            int count = 20;
+                            int count = 5;
                             PrintWriter printWriter = new PrintWriter(cmdSocket.getOutputStream(), true);
                             printWriter.println(count);
                             for(History s : HistoryWeb.getHistoryWeb(count)){
                                 printWriter.println(s.getDate() +"$"+ s.getUrl());
                             }
                             break;
+
                         case "exit":
                             System.out.println("Exiting command loop.");
                             if (view != null && view.isAlive()) {
@@ -171,6 +176,7 @@ public class MainClient {
             }
         }
     }
+
     public void showToast(Stage Stage, String message) {
         Platform.runLater(()->{
             Popup popup = new Popup();

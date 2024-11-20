@@ -1,15 +1,17 @@
 package UI;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.Network.Encode;
 
@@ -18,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
+import static javafx.scene.control.PopupControl.USE_COMPUTED_SIZE;
 
 public class ChatUI {
     private Socket socket;
@@ -87,29 +91,58 @@ public class ChatUI {
     }
 
     private void displayMessage(String message, Pos position) {
-        HBox messageBox = new HBox();
-
+//        HBox messageBox = new HBox();
+//
+//        Text text = new Text(message);
+//
+//        text.wrappingWidthProperty().bind(chatWindow.widthProperty().subtract(100));
+//        text.setFill(Color.WHITE);
+//        messageBox.getChildren().add(text);
+//
+//        // Đặt màu nền cho tin nhắn theo vị trí
+//        if (position == Pos.BASELINE_RIGHT) {
+//            messageBox.setStyle("-fx-background-color: #11141c; -fx-padding: 10; -fx-background-radius: 10;");
+//        } else {
+//            messageBox.setStyle("-fx-background-color: #0f7bd9; -fx-padding: 10; -fx-background-radius: 10;");
+//        }
+//
+//        Pane pane = new Pane(messageBox);  // Đặt HBox trong một Pane để kiểm soát vị trí
+//        if (position == Pos.BASELINE_RIGHT) {
+//            pane.setMaxWidth(Double.MAX_VALUE);
+//            messageBox.setAlignment(Pos.BASELINE_RIGHT);
+//            messageBox.setLayoutX(pane.getWidth() - messageBox.getWidth()); // Đẩy sát về bên phải
+//        } else {
+//            messageBox.setAlignment(Pos.BASELINE_LEFT);
+//        }
+//
+//        chatWindow.getItems().add(pane);
+        // Tạo Text hiển thị tin nhắn
         Text text = new Text(message);
-        text.wrappingWidthProperty().bind(chatWindow.widthProperty().subtract(100));
-        messageBox.getChildren().add(text);
+        text.setFill(Color.WHITE);
 
-        // Đặt màu nền cho tin nhắn theo vị trí
+// Tạo TextFlow để tự động điều chỉnh kích thước
+        TextFlow textFlow = new TextFlow(text);
+        textFlow.setPadding(new Insets(10));
+        textFlow.setMaxWidth(chatWindow.getWidth() / 2); // Giới hạn chiều rộng tối đa
+        textFlow.setStyle("-fx-background-radius: 10;");
+
+// Đặt màu nền tùy theo vị trí
         if (position == Pos.BASELINE_RIGHT) {
-            messageBox.setStyle("-fx-background-color: #DCF8C6; -fx-padding: 10; -fx-background-radius: 10;");
+            textFlow.setStyle("-fx-background-color: #11141c; -fx-background-radius: 10; -fx-padding: 10;");
         } else {
-            messageBox.setStyle("-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-background-radius: 10;");
+            textFlow.setStyle("-fx-background-color: #0f7bd9; -fx-background-radius: 10; -fx-padding: 10;");
         }
 
-        Pane pane = new Pane(messageBox);  // Đặt HBox trong một Pane để kiểm soát vị trí
+// Tạo HBox chứa TextFlow để căn chỉnh vị trí
+        HBox container = new HBox(textFlow);
         if (position == Pos.BASELINE_RIGHT) {
-            pane.setMaxWidth(Double.MAX_VALUE);
-            messageBox.setAlignment(Pos.BASELINE_RIGHT);
-            messageBox.setLayoutX(pane.getWidth() - messageBox.getWidth()); // Đẩy sát về bên phải
+            container.setAlignment(Pos.CENTER_RIGHT); // Tin nhắn gửi (bên phải)
         } else {
-            messageBox.setAlignment(Pos.BASELINE_LEFT);
+            container.setAlignment(Pos.CENTER_LEFT);  // Tin nhắn nhận (bên trái)
         }
 
-        chatWindow.getItems().add(pane);
+// Thêm container vào danh sách chat
+        chatWindow.getItems().add(container);
     }
 
     public void setSocket(Socket socket) throws IOException {
