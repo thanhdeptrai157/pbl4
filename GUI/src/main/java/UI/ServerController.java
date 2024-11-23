@@ -173,12 +173,46 @@ public class ServerController implements ClientConnectionListener {
             }
         }
     }
+    private void showImageInView1(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
+        boolean isRunning = true;
+        while (isRunning) {
+            try {
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket1().receive(numClient);
+                if (imageBytes != null) {
+                    BufferedImage bufferedImage = null;
+                    ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+
+                    try {
+                        bufferedImage = ImageIO.read(bis);
+                    } catch (IOException e) {
+                        System.out.println("Error reading image: " + e.getMessage());
+                    }
+                    if (bufferedImage != null) {
+                        Image fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+
+                        Platform.runLater(() -> {
+                            clientImageView.setImage(fxImage);
+                        });
+                    } else {
+                        System.out.println("Received corrupted image or image format not supported.");
+                    }
+                } else {
+                    // System.out.println("Received null image data.");
+                }
+                Thread.sleep(10);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     public void handleShowDashBoard() {
         try {
             for(Socket socket : MainServer.getInstance().getSocketMap().values()) {
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("view");
+                writer.println("viewSmall");
             }
 
         } catch (IOException e) {
@@ -199,7 +233,7 @@ public class ServerController implements ClientConnectionListener {
             int finalI = i;
             new Thread(() -> {
                 try {
-                    showImageInView(imageView, finalI+1);
+                    showImageInView1(imageView, finalI+1);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -215,7 +249,7 @@ public class ServerController implements ClientConnectionListener {
         try {
             for(Socket socket : MainServer.getInstance().getSocketMap().values()) {
                 PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-                writer.println("notView");
+                writer.println("notViewSmall");
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

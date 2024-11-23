@@ -17,6 +17,7 @@ public class MainServer {
     private final Map<String, Socket> socketMapFile= new HashMap<>();
     private static MainServer instance = null;
     private final ReceivePacket receivePacket;
+    private final ReceivePacket receivePacket1;
     public static MainServer getInstance() throws IOException {
         if(instance == null){
             synchronized (MainServer.class){
@@ -31,6 +32,7 @@ public class MainServer {
     private MainServer() throws IOException {
         serverSocket = new ServerSocket(5001);
         receivePacket = new ReceivePacket(5002);
+        receivePacket1 = new ReceivePacket(5005);
         serverSocketChat = new ServerSocket(5003);
         serverTransFiles = new ServerSocket(5004);
     }
@@ -64,6 +66,9 @@ public class MainServer {
     }
     public ReceivePacket getReceivePacket(){
         return receivePacket;
+    }
+    public ReceivePacket getReceivePacket1(){
+        return receivePacket1;
     }
 
     public Map<String, Socket> getSocketMap(){
