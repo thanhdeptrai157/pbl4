@@ -221,7 +221,7 @@ public class ServerController implements ClientConnectionListener {
         for(int i = 0; i < clientCounter; i++){
             Pane clientPane = new Pane();
             ImageView imageView = new ImageView();
-            imageView.setImage(new Image("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg"));
+            //imageView.setImage(new Image("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg"));
             imageView.setFitWidth(400);
             imageView.setFitHeight(200);
             double xOffset = 50 + (i % 3) * 400;

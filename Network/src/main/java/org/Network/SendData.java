@@ -39,7 +39,6 @@ public class SendData {
         int count = buffer.length / sizeData + 1;
         int idAck = new Random().nextInt();
 
-
         byte[] byteCount = intToByteArray(count);
         byte[] byteIpaddress = intToByteArray(intAdd);
         byte[] byteId = intToByteArray(idAck);
@@ -47,7 +46,8 @@ public class SendData {
         System.arraycopy(byteCount, 0, bytes, sizeData, byteCount.length);
         System.arraycopy(byteIpaddress, 0, bytes, sizeData + numberOfPart, byteIpaddress.length);
         System.arraycopy(byteId, 0, bytes, sizeData + numberOfPart + ipAddress, byteId.length);
-        System.arraycopy(buffer, 0, bytes, 0, sizeData);
+        //System.arraycopy(buffer, 0, bytes, 0, sizeData);
+        //System.arraycopy(buffer, 0, bytes, 0, buffer.length);
         bytes[sizeData + ipAddress + numberOfPart + id] = 0;
         ACK.Send(bytes, inetAddress, port);
         for(int i = 0; i < count; ++i){

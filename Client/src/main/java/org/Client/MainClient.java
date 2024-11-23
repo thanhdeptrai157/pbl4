@@ -314,8 +314,8 @@ public class MainClient {
 
                 BufferedImage screenShot = robot.createScreenCapture(rect);
 
-                int newWidth = screenShot.getWidth() / 10;
-                int newHeight = screenShot.getHeight() / 10;
+                int newWidth = screenShot.getWidth() / 5;
+                int newHeight = screenShot.getHeight() / 5;
                 BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_BYTE_INDEXED);
                 Graphics2D g = resizedImage.createGraphics();
                 g.drawImage(screenShot, 0, 0, newWidth, newHeight, null);
@@ -325,7 +325,7 @@ public class MainClient {
                 ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
                 ImageWriteParam param = writer.getDefaultWriteParam();
                 param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionQuality(0.3f);
+                param.setCompressionQuality(1.0f);
                 writer.setOutput(new MemoryCacheImageOutputStream(baos));
                 writer.write(null, new IIOImage(resizedImage, null, null), param);
                 writer.dispose();
