@@ -6,6 +6,6 @@
 <Pane fx:id="smallPane" prefHeight="66.0" prefWidth="231.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.ClientManagerController">
     <children>
         <Button layoutX="28.0" layoutY="21.0" text="Chat" onAction="#onChatClick"/>
-        <Button fx:id="buttonSend" layoutX="107.0" layoutY="21.0" text="Gửi bài tập" onAction="#handleSendAssignment" />
+        <Button fx:id="buttonSend" layoutX="107.0" layoutY="21.0" text="Nộp bài tập" onAction="#handleSendAssignment" />
     </children>
 </Pane>

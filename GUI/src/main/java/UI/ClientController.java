@@ -28,7 +28,11 @@ public class ClientController {
 
     public void onConnectButton () throws IOException {
 
-        String ip = ipField.getText().trim();
+     String ip = ipField.getText().trim();
+//        int port = Integer.parseInt(portField.getText().trim());
+        //String ip = "localhost";
+       // int port = 5001;
+       // String ip = ipField.getText().trim();
         int port = Integer.parseInt(portField.getText().trim());
         Stage currentStage = (Stage) pane.getScene().getWindow();
         client = new MainClient(ip, port, stage);
@@ -47,7 +51,7 @@ public class ClientController {
                 }
             }).start();
 
-           //currentStage.close();
+//            currentStage.close();
             openClientManage();
         }
         else{

@@ -79,16 +79,16 @@ public class MainClient {
                 String command = br.readLine();
                 if (command != null) {
                     switch (command.trim()) {
-                            case "view":
-                                if (view == null || !view.isAlive()) {
-                                    view = new Thread(() -> {
-                                        try {
-                                            receiveScreen();
-                                        } catch (AWTException | InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                    view.start();
+                        case "view":
+                            if (view == null || !view.isAlive()) {
+                                view = new Thread(() -> {
+                                    try {
+                                        receiveScreen();
+                                    } catch (AWTException | InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                                view.start();
 
                                 }
                                 showToast(stage, "Share màn hình");
@@ -116,70 +116,72 @@ public class MainClient {
 
 
                         case "lock":
-                                executorService.submit(this::lockScreen);
-                                break;
-                            case "notView":
-                                if (view != null && view.isAlive()) {
-                                    view.interrupt();
-                                    System.out.println("View thread stopped.");
+                        case "lockall":
+                            executorService.submit(this::lockScreen);
+                            break;
+                        case "notView":
+                            if (view != null && view.isAlive()) {
+                                view.interrupt();
+                                System.out.println("View thread stopped.");
+                            }
+                            break;
+                        case "history":
+                            int count = 5;
+                            PrintWriter printWriter = new PrintWriter(cmdSocket.getOutputStream(), true);
+                            printWriter.println(count);
+                            for(History s : HistoryWeb.getHistoryWeb(count)){
+                                printWriter.println(s.getDate() +"$"+ s.getUrl());
+                            }
+                            break;
+
+                        case "exit":
+                            System.out.println("Exiting command loop.");
+                            if (view != null && view.isAlive()) {
+                                view.interrupt();
+                            }
+                            shutdownExecutor();
+                            return;
+                        default:
+                            String[] commandSplit = command.split(" ");
+                            String event = commandSplit[0];
+                            if (event.equals("move")) {
+                                double x = Double.parseDouble(commandSplit[1]) * screenSize.getWidth() / 1200;
+                                double y = Double.parseDouble(commandSplit[2]) * screenSize.getHeight() / 680;
+                                robot.mouseMove((int) x, (int) y);
+                            } else if (event.equals("click")) {
+                                String clickType = commandSplit[3];
+                                if (clickType.equals("left")) {
+                                    robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                                    robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                                } else if (clickType.equals("right")) {
+                                    robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
+                                    robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
                                 }
-                                break;
-                            case "history":
-                                int count = 20;
-                                PrintWriter printWriter = new PrintWriter(cmdSocket.getOutputStream(), true);
-                                printWriter.println(count);
-                                for(History s : HistoryWeb.getHistoryWeb(count)){
-                                    printWriter.println(s.getDate() +"$"+ s.getUrl());
+                            } else if (event.equals("type")) {
+                                System.out.println(command);
+                                int keyCode = Integer.parseInt(commandSplit[1]);
+                                boolean isShiftPress = Boolean.parseBoolean(commandSplit[2]);
+                                boolean isCtrlPress = Boolean.parseBoolean(commandSplit[3]);
+                                boolean isAltPress = Boolean.parseBoolean(commandSplit[4]);
+                                if (isShiftPress) robot.keyPress(KeyEvent.VK_SHIFT);
+                                if (isCtrlPress) robot.keyPress(KeyEvent.VK_CONTROL);
+                                if (isAltPress) robot.keyPress(KeyEvent.VK_ALT);
+                                if(keyCode != 0 && keyCode != 16 && keyCode!= 18 && keyCode != 17){
+                                    robot.keyPress(keyCode);
+                                    robot.keyRelease(keyCode);
                                 }
-                                break;
-                            case "exit":
-                                System.out.println("Exiting command loop.");
-                                if (view != null && view.isAlive()) {
-                                    view.interrupt();
-                                }
-                                shutdownExecutor();
-                                return;
-                            default:
-                                String[] commandSplit = command.split(" ");
-                                String event = commandSplit[0];
-                                if (event.equals("move")) {
-                                    double x = Double.parseDouble(commandSplit[1]) * screenSize.getWidth() / 1200;
-                                    double y = Double.parseDouble(commandSplit[2]) * screenSize.getHeight() / 680;
-                                    robot.mouseMove((int) x, (int) y);
-                                } else if (event.equals("click")) {
-                                    String clickType = commandSplit[3];
-                                    if (clickType.equals("left")) {
-                                        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                                    } else if (clickType.equals("right")) {
-                                        robot.mousePress(InputEvent.BUTTON3_DOWN_MASK);
-                                        robot.mouseRelease(InputEvent.BUTTON3_DOWN_MASK);
-                                    }
-                                } else if (event.equals("type")) {
-                                    System.out.println(command);
-                                    int keyCode = Integer.parseInt(commandSplit[1]);
-                                    boolean isShiftPress = Boolean.parseBoolean(commandSplit[2]);
-                                    boolean isCtrlPress = Boolean.parseBoolean(commandSplit[3]);
-                                    boolean isAltPress = Boolean.parseBoolean(commandSplit[4]);
-                                    if (isShiftPress) robot.keyPress(KeyEvent.VK_SHIFT);
-                                    if (isCtrlPress) robot.keyPress(KeyEvent.VK_CONTROL);
-                                    if (isAltPress) robot.keyPress(KeyEvent.VK_ALT);
-                                    if(keyCode != 0 && keyCode != 16 && keyCode!= 18 && keyCode != 17){
-                                        robot.keyPress(keyCode);
-                                        robot.keyRelease(keyCode);
-                                    }
-                                    if(isShiftPress) robot.keyRelease(KeyEvent.VK_SHIFT);
-                                    if(isCtrlPress) robot.keyRelease(KeyEvent.VK_CONTROL);
-                                    if(isAltPress) robot.keyRelease(KeyEvent.VK_ALT);
-                                    System.out.println(keyCode);
-                                }
-                                else if(event.equals("scroll")){
-                                    int delta = Integer.parseInt(commandSplit[1]);
-                                    robot.mouseWheel(delta);
-                                } else if (event.equals("Mess:")) {
-                                    showToast(stage, command);
-                                }
-                                break;
+                                if(isShiftPress) robot.keyRelease(KeyEvent.VK_SHIFT);
+                                if(isCtrlPress) robot.keyRelease(KeyEvent.VK_CONTROL);
+                                if(isAltPress) robot.keyRelease(KeyEvent.VK_ALT);
+                                System.out.println(keyCode);
+                            }
+                            else if(event.equals("scroll")){
+                                int delta = Integer.parseInt(commandSplit[1]);
+                                robot.mouseWheel(delta);
+                            } else if (event.equals("Mess:")) {
+                                showToast(stage, command);
+                            }
+                            break;
                     }
                 } else {
                     System.out.println("Server disconnected.");
@@ -193,6 +195,7 @@ public class MainClient {
             }
         }
     }
+
     public void showToast(Stage Stage, String message) {
         Platform.runLater(()->{
             Popup popup = new Popup();

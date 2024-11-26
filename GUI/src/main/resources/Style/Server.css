@@ -4,22 +4,41 @@
 }
 
 /* Sidebar */
-.anchor-pane-sidebar {
-    -fx-background-color: #263238; /* Sidebar màu tối */
-    -fx-padding: 20px; /* Khoảng cách padding để nút thoáng hơn */
+
+//.anchor-pane-sidebar {
+   // -fx-background-color: #263238; /* Sidebar màu tối */
+  //  -fx-padding: 20px; /* Khoảng cách padding để nút thoáng hơn */
+   // -fx-background-color: #032251;
+//}
+
+.pane-sidebar{
+    -fx-background-color: #032251;
 }
 
+
 .button {
-    -fx-text-fill: #FFFFFF; /* Màu chữ của nút là trắng */
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-background-color: #455A64;
-    -fx-background-radius: 5;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+    //-fx-text-fill: #FFFFFF; /* Màu chữ của nút là trắng */
+    //-fx-font-size: 16px;
+    //-fx-font-weight: bold;
+    //-fx-background-color: #455A64;
+   // -fx-background-radius: 5;
+   // -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+
+
+     -fx-background-color: #FFFFFF;
+     -fx-text-fill: #0E81A0;
+     -fx-font-size: 14px;
+     -fx-font-weight: bold;
+     -fx-background-radius: 2;
+      -fx-border-color: transparent;
 }
 
 .button:hover {
-    -fx-background-color: #546E7A;
+    //-fx-background-color: #546E7A;
+      -fx-background-color: linear-gradient(to bottom, #2563EB, #3B82F6); /* Darker blue gradient */
+            -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.4), 10, 0.5, 0, 5);
+            -fx-text-fill: white;
+            -fx-cursor: hand;
 }
 
 .button:pressed {
@@ -27,13 +46,13 @@
 }
 
 /* Main area background */
-.anchor-pane-main {
-    -fx-background-color: #FFFFFF;
-    -fx-padding: 20px;
-    -fx-border-color: #E0E0E0;
-    -fx-border-width: 1;
-    -fx-border-radius: 10;
-}
+//.anchor-pane-main {
+    //-fx-background-color: #FFFFFF;
+    //-fx-padding: 20px;
+   // -fx-border-color: #E0E0E0;
+   // -fx-border-width: 1;
+   // -fx-border-radius: 10;
+//}
 
 /* Label welcome message */
 .welcome-label {

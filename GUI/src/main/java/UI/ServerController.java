@@ -109,6 +109,7 @@ public class ServerController implements ClientConnectionListener {
                     throw new RuntimeException(e);
                 }
             }
+            handleShowHome();
             addClientIndicator(clientIP, chatUI);
         });
     }
@@ -171,6 +172,17 @@ public class ServerController implements ClientConnectionListener {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
+        }
+    }
+    public void handleLockAll(){
+    try {
+        for (Socket socket : MainServer.getInstance().getSocketMap().values()) {
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("lockall");
+        }
+    }
+    catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
         }
     }
     private void showImageInView1(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
