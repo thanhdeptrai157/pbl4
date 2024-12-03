@@ -250,7 +250,7 @@ public class ServerController implements ClientConnectionListener {
             //imageView.setImage(new Image("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg"));
             imageView.setFitWidth(400);
             imageView.setFitHeight(200);
-            double xOffset = 50 + (i % 3) * 400;
+            double xOffset = 50 + (i % 3) * 450;
             double yOffset = 50 + (i / 3) * 300;
             clientPane.getChildren().add(imageView);
             clientPane.setLayoutX(xOffset);
