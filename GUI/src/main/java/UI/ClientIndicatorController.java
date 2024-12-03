@@ -51,8 +51,14 @@ public class ClientIndicatorController {
     private PrintWriter writer;
     private BufferedReader reader;
     private Thread historyThread;
+    private Thread fileReceiverThread;
+    private boolean isLock = false;
+    private ReceiverTransfer receiveFile;
+    private volatile String filePathReceive = "Server/files/";
+    private String clientIP;
     public void initialize(String clientIP, ChatUI chatUI, int numClient) throws IOException {
         clientLabel.setText("Client IP: " + clientIP);
+        this.clientIP = clientIP;
         clientLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
         this.numClient = numClient;
         reader = new BufferedReader(new InputStreamReader(MainServer.getInstance().getSocketMap().get(clientIP).getInputStream()));
@@ -72,36 +78,58 @@ public class ClientIndicatorController {
             openListViewHistory();
         });
         lockScreenButton.setOnAction(event -> {
-            writer.println("lock");
+            LockScreenClient();
         });
 
         messageButton.setOnAction(event -> {
             openChatWindow(clientIP, chatUI);
         });
-        //String filePathReceive =  "/pbl4/Server/files/";
-        String filePathReceive =  "Server/files/";
-        new Thread(() -> {
+        fileReceiverThread = new Thread(() -> {
             while (true) {
                 try {
+                    System.out.println(filePathReceive);
+                    receiveFile = new ReceiverTransfer(filePathReceive, MainServer.getInstance().getSocketMapFile().get(clientIP));
                     Thread.sleep(1000);
-                } catch (InterruptedException ex) {
+                    receiveFile.start();
+                    receiveFile.join();
+                } catch (InterruptedException | IOException ex) {
                     throw new RuntimeException(ex);
                 }
-                ReceiverTransfer receiveFile = null;
+            }
+        });
+        fileReceiverThread.start();
+    }
+    public void setFilePath(String filePath) {
+        filePathReceive = filePath+"\\";
+        fileReceiverThread.interrupt();
+        fileReceiverThread =  new Thread(() -> {
+            while (true) {
                 try {
+                    System.out.println(filePathReceive);
                     receiveFile = new ReceiverTransfer(filePathReceive, MainServer.getInstance().getSocketMapFile().get(clientIP));
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                receiveFile.start();
-                try {
+                    Thread.sleep(1000);
+                    receiveFile.start();
                     receiveFile.join();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                } catch (InterruptedException | IOException ex) {
+                    throw new RuntimeException(ex);
                 }
             }
-        }).start();
+        });
+        fileReceiverThread.start();
     }
+    public void LockScreenClient(){
+        if(!isLock){
+            writer.println("lock");
+            lockScreenButton.setText("Unlock");
+            isLock = true;
+        }
+        else{
+            writer.println("unlock");
+            lockScreenButton.setText("Lock");
+            isLock = false;
+        }
+    }
+
     private void showImageInView(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
         isRunning = true;
         while (isRunning) {

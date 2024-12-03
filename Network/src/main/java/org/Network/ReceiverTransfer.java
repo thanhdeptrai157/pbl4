@@ -30,8 +30,8 @@ public class ReceiverTransfer extends Thread{
         this.filePathReceive = filePathReceive;
         this.socket = socket;
     }
-
     public static void getFile(String filePathReceive, Socket socket){
+        System.out.println("1 " +filePathReceive);
         try {
             DataInputStream inputStream = new DataInputStream(socket.getInputStream());
 

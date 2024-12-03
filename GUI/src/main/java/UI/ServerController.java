@@ -2,6 +2,7 @@ package UI;
 import javafx.application.Platform;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -13,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.Network.SenderTransfer;
@@ -28,7 +30,8 @@ import java.util.Map;
 
 
 public class ServerController implements ClientConnectionListener {
-
+    @FXML
+    private Button lockButton;
     @FXML
     private Pane mainLayout;
     @FXML
@@ -38,10 +41,14 @@ public class ServerController implements ClientConnectionListener {
     private int clientCounter = 0;
     private Pane dashBoard;
     private Pane home;
+    private boolean isLock;
+    private Map<String, ClientIndicatorController> mapClients = new HashMap<>();
+
     @FXML
     public void initialize() throws IOException {
         dashBoard = new Pane();
         home = new Pane();
+        isLock = false;
         new Thread(() -> {
             try {
                 MainServer.getInstance().startServer(this);
@@ -49,6 +56,7 @@ public class ServerController implements ClientConnectionListener {
                 throw new RuntimeException(e);
             }
         }).start();
+        System.out.println(lockButton.getText());
     }
     @FXML
     private void handleSendAssignment() throws IOException {
@@ -86,7 +94,7 @@ public class ServerController implements ClientConnectionListener {
             clientCounter++;
             ClientIndicatorController clientIndicatorController = loader.getController();
             clientIndicatorController.initialize(clientIP, chatUI, clientCounter);
-
+            mapClients.put(clientIP, clientIndicatorController);
             clientPane.setLayoutX(xOffset);
             clientPane.setLayoutY(yOffset);
 
@@ -175,14 +183,20 @@ public class ServerController implements ClientConnectionListener {
         }
     }
     public void handleLockAll(){
-    try {
-        for (Socket socket : MainServer.getInstance().getSocketMap().values()) {
-            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println("lockall");
+        if(!isLock){
+            isLock = true;
+            Platform.runLater(()->{
+                lockButton.setText("Mở khoá tất cả");
+            });
         }
-    }
-    catch(Exception e){
-            System.out.println("Error: " + e.getMessage());
+        else{
+            Platform.runLater(()->{
+                lockButton.setText("Khoá tất cả");
+            });
+            isLock = false;
+        }
+        for(String key : mapClients.keySet()){
+            mapClients.get(key).LockScreenClient();
         }
     }
     private void showImageInView1(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
@@ -268,6 +282,23 @@ public class ServerController implements ClientConnectionListener {
         }
         mainLayout.getChildren().clear();
         mainLayout.getChildren().add(home);
+    }
+
+    public void handleFilePathChange(ActionEvent actionEvent) throws IOException {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Chọn thư mục để lưu tệp");
+        Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+
+        if (selectedDirectory != null) {
+            String folderPath = selectedDirectory.getAbsolutePath();
+            System.out.println("Đường dẫn thư mục đã chọn: " + folderPath);
+        } else {
+            System.out.println("Không có thư mục nào được chọn.");
+        }
+        for(String key : mapClients.keySet()){
+            mapClients.get(key).setFilePath(selectedDirectory.getAbsolutePath());
+        }
     }
 }
 

@@ -31,12 +31,15 @@ public class MainClient {
     private Thread dashboard;
     private final String ipServer;
     private boolean isConnected;
+    private boolean isLocking;
     private final Socket cmdSocket;
     private final Socket chatSocket;
     private final Socket fileSocket;
     private final int numberClient;
     private final ExecutorService executorService = Executors.newCachedThreadPool();
+    private Thread lock;
     private Stage stage;
+    private LockScreen lockScreen = new LockScreen();
     public MainClient(String url, int port,Stage stage) {
         ipServer = url;
 
@@ -54,6 +57,7 @@ public class MainClient {
             throw new RuntimeException(e);
         }
         getFile();
+        isLocking = false;
     }
     public void setStage(Stage stage){
         this.stage = stage;
@@ -89,11 +93,10 @@ public class MainClient {
                                     }
                                 });
                                 view.start();
-
                                 }
-                                showToast(stage, "Share màn hình");
-                                break;
-                            case "viewSmall":
+                                //showToast(stage, "Share màn hình");
+                            break;
+                        case "viewSmall":
                                 if (dashboard == null || !dashboard.isAlive()) {
                                     dashboard = new Thread(() -> {
                                         try {
@@ -107,23 +110,31 @@ public class MainClient {
                                 }
                             showToast(stage, "Share màn hình");
                             break;
-                            case "notViewSmall":
-                                if (dashboard != null && dashboard.isAlive()) {
-                                    dashboard.interrupt();
-                                    System.out.println("View thread stopped.");
-                                }
-                                break;
-
-
+                        case "notViewSmall":
+                            if (dashboard != null && dashboard.isAlive()) {
+                                dashboard.interrupt();
+                                System.out.println("View thread stopped.");
+                            }
+                            break;
                         case "lock":
-                        case "lockall":
-                            executorService.submit(this::lockScreen);
+                            isLocking = true;
+                            lock = new Thread(()->{
+                                if(isLocking){
+                                    this.lockScreen();
+                                }
+                            });
+                            lock.start();
                             break;
                         case "notView":
                             if (view != null && view.isAlive()) {
                                 view.interrupt();
                                 System.out.println("View thread stopped.");
                             }
+                            break;
+                        case "unlock":
+                            isLocking = false;
+                            lock.interrupt();
+                            lockScreen.unlockScreen();
                             break;
                         case "history":
                             int count = 5;
@@ -264,13 +275,12 @@ public class MainClient {
 
     public void lockScreen()  {
         try{
-            LockScreen.lockScreen();
+            lockScreen.lockScreen();
         }
         catch (Exception e){
             e.printStackTrace();
         }
     }
-
     public void receiveScreen() throws AWTException, InterruptedException {
         System.out.println("View");
         SendData sendData = new SendData(ipServer, 5002, numberClient);

@@ -12,8 +12,8 @@ public class ServerUI extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ServerUI.class.getResource("Server.fxml"));
-        //Scene scene = new Scene(fxmlLoader.load(), 1470, 780);
-        Scene scene = new Scene(fxmlLoader.load(), 1300, 680);
+        Scene scene = new Scene(fxmlLoader.load(), 1470, 780);
+        //Scene scene = new Scene(fxmlLoader.load(), 1300, 680);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.setTitle("Server Chao Xin!");

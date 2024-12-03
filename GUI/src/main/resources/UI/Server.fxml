@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.control.Label?>
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780" prefWidth="1470" stylesheets="@../Style/Server.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="UI.ServerController">
    <children>
       <Pane layoutX="1.0" prefHeight="780.0" prefWidth="250.0" styleClass="pane-sidebar">
          <children>
 
-            <ImageView layoutX="40.0" layoutY="20.0" fitWidth="150.0" fitHeight="150.0">
+            <ImageView fitHeight="150.0" fitWidth="150.0" layoutX="40.0" layoutY="20.0">
                <image>
                   <!-- Path to your image, replace with the actual file path -->
-                  <Image url="@../Style/logoApp.png"/>
+                  <Image url="@../Style/logoApp.png" />
                </image>
             </ImageView>
 
-            <Label layoutX="20.0" layoutY="180.0" text="MONITORING SYSTEM"
-                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0E81A0;"/>
+            <Label layoutX="20.0" layoutY="180.0" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0E81A0;" text="MONITORING SYSTEM" />
 
 
             <Button fx:id="homeButton" layoutX="27.0" layoutY="290.0" mnemonicParsing="false" onAction="#handleShowHome" prefHeight="40.0" prefWidth="170.0" text="Home" />
             <Button fx:id="dashboardButton" layoutX="27.0" layoutY="350.0" mnemonicParsing="false" onAction="#handleShowDashBoard" prefHeight="40.0" prefWidth="170.0" text="Dashboard" />
             <Button fx:id="sendAssignmentButton" layoutX="27.0" layoutY="410.0" mnemonicParsing="false" onAction="#handleSendAssignment" prefHeight="40.0" prefWidth="170.0" text="Gửi bài tập" />
             <Button fx:id="sendToastMessage" layoutX="27.0" layoutY="470.0" mnemonicParsing="false" onAction="#handleSendToastMessage" prefHeight="40.0" prefWidth="170.0" text="Gửi thông báo" />
-            <Button layoutX="27.0" layoutY="530.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" onAction="#handleLockAll" text="Khóa máy tất cả" />
+            <Button fx:id="lockButton" layoutX="27.0" layoutY="530.0" mnemonicParsing="false" onAction="#handleLockAll" prefHeight="40.0" prefWidth="170.0" text="Khóa máy tất cả" />
             <Button layoutX="27.0" layoutY="590.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" text="Screenshot all" />
+            <Button layoutX="61.0" layoutY="688.0" mnemonicParsing="false" text="Setting" onAction="#handleFilePathChange"/>
          </children>
       </Pane>
-      <Pane layoutX="257.0"  prefHeight="586.0" prefWidth="1226.0">
+      <Pane layoutX="257.0" prefHeight="586.0" prefWidth="1226.0">
          <children>
       
             <ScrollPane fx:id="scrollPane" layoutX="1.0" prefHeight="670.0" prefWidth="1020">
