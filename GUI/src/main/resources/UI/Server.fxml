@@ -27,8 +27,8 @@
             <Button fx:id="sendAssignmentButton" layoutX="27.0" layoutY="410.0" mnemonicParsing="false" onAction="#handleSendAssignment" prefHeight="40.0" prefWidth="170.0" text="Gửi bài tập" />
             <Button fx:id="sendToastMessage" layoutX="27.0" layoutY="470.0" mnemonicParsing="false" onAction="#handleSendToastMessage" prefHeight="40.0" prefWidth="170.0" text="Gửi thông báo" />
             <Button fx:id="lockButton" layoutX="27.0" layoutY="530.0" mnemonicParsing="false" onAction="#handleLockAll" prefHeight="40.0" prefWidth="170.0" text="Khóa máy tất cả" />
-            <Button layoutX="27.0" layoutY="590.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" text="Screenshot all" />
-            <Button layoutX="61.0" layoutY="688.0" mnemonicParsing="false" text="Setting" onAction="#handleFilePathChange"/>
+<!--            <Button layoutX="27.0" layoutY="590.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="170.0" text="Screenshot all" />-->
+            <Button layoutX="27.0" layoutY="590.0" mnemonicParsing="false" text="Setting" onAction="#handleFilePathChange" prefHeight="40.0" prefWidth="170.0"/>
          </children>
       </Pane>
       <Pane layoutX="257.0" prefHeight="586.0" prefWidth="1226.0">
