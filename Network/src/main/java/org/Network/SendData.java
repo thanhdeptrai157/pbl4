@@ -35,37 +35,36 @@ public class SendData {
 
     public void Send(byte[] buffer){
         
-        byte[] bytes = new byte[sizeData + ipAddress + numberOfPart + id + type];
+        byte[] bytes = new byte[1 + 4 * 3];
         int count = buffer.length / sizeData + 1;
         int idAck = new Random().nextInt();
 
         byte[] byteCount = intToByteArray(count);
         byte[] byteIpaddress = intToByteArray(intAdd);
-        byte[] byteId = intToByteArray(idAck);
+        byte[] byteIdAck = intToByteArray(idAck);
 
-        System.arraycopy(byteCount, 0, bytes, sizeData, byteCount.length);
-        System.arraycopy(byteIpaddress, 0, bytes, sizeData + numberOfPart, byteIpaddress.length);
-        System.arraycopy(byteId, 0, bytes, sizeData + numberOfPart + ipAddress, byteId.length);
-        //System.arraycopy(buffer, 0, bytes, 0, sizeData);
-        //System.arraycopy(buffer, 0, bytes, 0, buffer.length);
-        bytes[sizeData + ipAddress + numberOfPart + id] = 0;
+        bytes[0] = 0;
+        System.arraycopy(byteIdAck, 0, bytes, 1, byteIdAck.length);
+        System.arraycopy(byteIpaddress, 0, bytes, 1 + 4, byteIpaddress.length);
+        System.arraycopy(byteCount, 0, bytes, 1 + 2 * 4, byteCount.length);
         ACK.Send(bytes, inetAddress, port);
+        bytes = new byte[1 + 4 * 3 + sizeData];
+
         for(int i = 0; i < count; ++i){
                 idAck = new Random().nextInt();
                 int size = Math.min(sizeData, buffer.length - (i) * sizeData);
 
                 byte[] byteOrdinal = intToByteArray(i);
                 byteIpaddress = intToByteArray(intAdd);
-                byteId = intToByteArray(idAck);
+                byteIdAck = intToByteArray(idAck);
 
-                System.arraycopy(buffer, i * sizeData, bytes, 0, size);
-                System.arraycopy(byteOrdinal, 0, bytes, sizeData, byteCount.length);
-                System.arraycopy(byteIpaddress, 0, bytes, sizeData + ordinal, byteIpaddress.length);
-                System.arraycopy(byteId, 0, bytes, sizeData + ordinal + ipAddress, byteId.length);
-                bytes[sizeData + ipAddress + numberOfPart + id] = 1;
-
+                bytes[0] = 1;
+                System.arraycopy(byteIdAck, 0, bytes, 1, byteIdAck.length);
+                System.arraycopy(byteIpaddress, 0, bytes, 1 + 4, byteIpaddress.length);
+                System.arraycopy(byteOrdinal, 0, bytes, 1 + 4 * 2, byteCount.length);
+                System.arraycopy(buffer, i * sizeData, bytes, 1 + 4 * 3, size);
                 ACK.Send(bytes, inetAddress, port);
-            }
+        }
 
     }
 
