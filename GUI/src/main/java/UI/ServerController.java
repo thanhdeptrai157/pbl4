@@ -1,26 +1,54 @@
 package UI;
 import javafx.application.Platform;
+
+import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.Network.SenderTransfer;
 import org.Server.ClientConnectionListener;
 import org.Server.MainServer;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class ServerController implements ClientConnectionListener {
+    @FXML
+    private Button lockButton;
+    @FXML
+    private Pane mainLayout;
+    @FXML
+    private Button sendAssignmentButton;
+    private final Map<String, ChatUI> clientChats = new HashMap<>();
+    private File selectedFile;
+    private int clientCounter = 0;
+    private Pane dashBoard;
+    private Pane home;
+    private boolean isLock;
+    private Map<String, ClientIndicatorController> mapClients = new HashMap<>();
 
     @FXML
-    private AnchorPane mainLayout;
-    private ChatUI chatUI;
-    private final Map<String, ChatUI> clientChats = new HashMap<>();
-    private int clientCounter = 0;
-    @FXML
     public void initialize() throws IOException {
-        chatUI = new ChatUI();
+        dashBoard = new Pane();
+        home = new Pane();
+        isLock = false;
         new Thread(() -> {
             try {
                 MainServer.getInstance().startServer(this);
@@ -28,28 +56,54 @@ public class ServerController implements ClientConnectionListener {
                 throw new RuntimeException(e);
             }
         }).start();
+        System.out.println(lockButton.getText());
     }
-private void addClientIndicator(String clientIP, ChatUI chatUI) {
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/UI/ClientIndicator.fxml"));
-        double xOffset = 50 + (clientCounter % 3) * 400;
-        double yOffset = 50 + (clientCounter / 3) * 300;
-        Parent clientPane = loader.load();
-        clientCounter++;
-        ClientIndicatorController clientIndicatorController = loader.getController();
-        clientIndicatorController.initialize(clientIP, chatUI, clientCounter);
+    @FXML
+    private void handleSendAssignment() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Chọn tệp bài tập");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Tất cả các tệp", "*.*"),
+                new FileChooser.ExtensionFilter("Tệp văn bản", "*.txt", "*.pdf", "*.docx")
+        );
+        Stage stage = (Stage) sendAssignmentButton.getScene().getWindow();
+        selectedFile = fileChooser.showOpenDialog(stage);
+        if (selectedFile != null) {
+            System.out.println("Đã chọn tệp: " + selectedFile.getAbsolutePath());
+            for(Socket socket : MainServer.getInstance().getSocketMapFile().values() ) {
+                SenderTransfer senderFile = new SenderTransfer(selectedFile, socket);
+                senderFile.start();
+                try {
+                    senderFile.join();
+                    System.out.println("Đã gửi file: " + selectedFile.getName());
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
 
-
-
-        AnchorPane.setTopAnchor(clientPane, yOffset);
-        AnchorPane.setLeftAnchor(clientPane, xOffset);
-
-        mainLayout.getChildren().add(clientPane);
-
-    } catch (IOException e) {
-        e.printStackTrace();
+        } else {
+            System.out.println("Không có tệp nào được chọn.");
+        }
     }
-}
+    private void addClientIndicator(String clientIP, ChatUI chatUI) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/UI/ClientIndicator.fxml"));
+            double xOffset = 50 + (clientCounter % 3) * 400;
+            double yOffset = 50 + (clientCounter / 3) * 300;
+            Parent clientPane = loader.load();
+            clientCounter++;
+            ClientIndicatorController clientIndicatorController = loader.getController();
+            clientIndicatorController.initialize(clientIP, chatUI, clientCounter);
+            mapClients.put(clientIP, clientIndicatorController);
+            clientPane.setLayoutX(xOffset);
+            clientPane.setLayoutY(yOffset);
+
+            home.getChildren().add(clientPane);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onClientConnected(String clientIP) {
         Platform.runLater(() -> {
@@ -63,7 +117,188 @@ private void addClientIndicator(String clientIP, ChatUI chatUI) {
                     throw new RuntimeException(e);
                 }
             }
+            handleShowHome();
             addClientIndicator(clientIP, chatUI);
         });
     }
+
+    public void handleSendToastMessage() {
+        Stage message = new Stage();
+        message.setTitle("Nhap thong bao");
+
+        TextField textfield = new TextField();
+        Button send = new Button("Gửi");
+        send.setOnAction(event->{
+            String mes = textfield.getText();
+            try {
+                for(Socket socket : MainServer.getInstance().getSocketMap().values()){
+                    PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+                    writer.println("Mess: " + mes);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        VBox layout = new VBox(10);
+        layout.getChildren().addAll(textfield, send);
+        layout.setAlignment(Pos.CENTER);
+
+
+        Scene scene = new Scene(layout, 300, 150);
+        message.setScene(scene);
+        message.show();
+    }
+    private void showImageInView(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
+        boolean isRunning = true;
+        while (isRunning) {
+            try {
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket().receive(numClient);
+                if (imageBytes != null) {
+                    BufferedImage bufferedImage = null;
+                    ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+
+                    try {
+                        bufferedImage = ImageIO.read(bis);
+                    } catch (IOException e) {
+                        System.out.println("Error reading image: " + e.getMessage());
+                    }
+                    if (bufferedImage != null) {
+                        Image fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+
+                        Platform.runLater(() -> {
+                            clientImageView.setImage(fxImage);
+                        });
+                    } else {
+                        System.out.println("Received corrupted image or image format not supported.");
+                    }
+                } else {
+                    // System.out.println("Received null image data.");
+                }
+                Thread.sleep(10);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    public void handleLockAll(){
+        if(!isLock){
+            isLock = true;
+            Platform.runLater(()->{
+                lockButton.setText("Mở khoá tất cả");
+            });
+        }
+        else{
+            Platform.runLater(()->{
+                lockButton.setText("Khoá tất cả");
+            });
+            isLock = false;
+        }
+        for(String key : mapClients.keySet()){
+            mapClients.get(key).LockScreenClient();
+        }
+    }
+    private void showImageInView1(ImageView clientImageView, int numClient) throws InterruptedException, IOException {
+        boolean isRunning = true;
+        while (isRunning) {
+            try {
+                byte[] imageBytes = MainServer.getInstance().getReceivePacket1().receive(numClient);
+                if (imageBytes != null) {
+                    BufferedImage bufferedImage = null;
+                    ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+
+                    try {
+                        bufferedImage = ImageIO.read(bis);
+                    } catch (IOException e) {
+                        System.out.println("Error reading image: " + e.getMessage());
+                    }
+                    if (bufferedImage != null) {
+                        Image fxImage = SwingFXUtils.toFXImage(bufferedImage, null);
+
+                        Platform.runLater(() -> {
+                            clientImageView.setImage(fxImage);
+                        });
+                    } else {
+                        System.out.println("Received corrupted image or image format not supported.");
+                    }
+                } else {
+                    // System.out.println("Received null image data.");
+                }
+                Thread.sleep(10);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void handleShowDashBoard() {
+        try {
+            for(Socket socket : MainServer.getInstance().getSocketMap().values()) {
+                PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("viewSmall");
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        for(int i = 0; i < clientCounter; i++){
+            Pane clientPane = new Pane();
+            ImageView imageView = new ImageView();
+            //imageView.setImage(new Image("D:\\pbl4\\GUI\\src\\main\\resources\\Style\\cmp.jpg"));
+            imageView.setFitWidth(400);
+            imageView.setFitHeight(200);
+            double xOffset = 50 + (i % 3) * 450;
+            double yOffset = 50 + (i / 3) * 300;
+            clientPane.getChildren().add(imageView);
+            clientPane.setLayoutX(xOffset);
+            clientPane.setLayoutY(yOffset);
+            dashBoard.getChildren().add(clientPane);
+            int finalI = i;
+            new Thread(() -> {
+                try {
+                    showImageInView1(imageView, finalI+1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).start();
+        }
+        mainLayout.getChildren().clear();
+        mainLayout.getChildren().add(dashBoard);
+    }
+
+    public void handleShowHome() {
+        try {
+            for(Socket socket : MainServer.getInstance().getSocketMap().values()) {
+                PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+                writer.println("notViewSmall");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        mainLayout.getChildren().clear();
+        mainLayout.getChildren().add(home);
+    }
+
+    public void handleFilePathChange(ActionEvent actionEvent) throws IOException {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Chọn thư mục để lưu tệp");
+        Stage stage = (Stage) ((Button) actionEvent.getSource()).getScene().getWindow();
+        File selectedDirectory = directoryChooser.showDialog(stage);
+
+        if (selectedDirectory != null) {
+            String folderPath = selectedDirectory.getAbsolutePath();
+            System.out.println("Đường dẫn thư mục đã chọn: " + folderPath);
+        } else {
+            System.out.println("Không có thư mục nào được chọn.");
+        }
+        for(String key : mapClients.keySet()){
+            mapClients.get(key).setFilePath(selectedDirectory.getAbsolutePath());
+        }
+    }
 }
+

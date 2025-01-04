@@ -10,18 +10,18 @@
     </parent>
     <artifactId>Client</artifactId>
 
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>3.0.0</version> <!-- Hoặc phiên bản mới nhất -->
-            <configuration>
-                <mainClass>org.Client.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version> <!-- Hoặc phiên bản mới nhất -->
+                <configuration>
+                    <mainClass>org.Client.MainClient</mainClass> <!-- Thay bằng tên lớp chính của bạn -->
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
     <properties>
         <maven.compiler.source>20</maven.compiler.source>
         <maven.compiler.target>20</maven.compiler.target>
@@ -38,7 +38,16 @@
             <artifactId>javacv</artifactId>
             <version>1.5.10</version> <!-- Phiên bản mới nhất -->
         </dependency>
-
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.13.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.13.0</version>
+        </dependency>
         <dependency>
             <groupId>org.bytedeco</groupId>
             <artifactId>ffmpeg</artifactId>

@@ -1,21 +1,23 @@
 package org.Server;
 
 
-import org.Network.ReceivePacket;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
-
+import org.Network.*;
 
 public class MainServer {
-    private ServerSocket serverSocket;
-    private ServerSocket serverSocketChat;
-    private Map<String, Socket> socketMap = new HashMap<>();
-    private Map<String, Socket> socketMapChat = new HashMap<>();
+    private final ServerSocket serverSocket;
+    private final ServerSocket serverSocketChat;
+    private final ServerSocket serverTransFiles;
+    private final Map<String, Socket> socketMap = new HashMap<>();
+    private final Map<String, Socket> socketMapChat = new HashMap<>();
+    private final Map<String, Socket> socketMapFile= new HashMap<>();
     private static MainServer instance = null;
-    private ReceivePacket receivePacket;
+    private final ReceivePacket receivePacket;
+    private final ReceivePacket receivePacket1;
     public static MainServer getInstance() throws IOException {
         if(instance == null){
             synchronized (MainServer.class){
@@ -30,7 +32,9 @@ public class MainServer {
     private MainServer() throws IOException {
         serverSocket = new ServerSocket(5001);
         receivePacket = new ReceivePacket(5002);
+        receivePacket1 = new ReceivePacket(5005);
         serverSocketChat = new ServerSocket(5003);
+        serverTransFiles = new ServerSocket(5004);
     }
 
     public void startServer(ClientConnectionListener client) throws IOException {
@@ -45,6 +49,10 @@ public class MainServer {
             //Socket cho chat
             Socket clientSocketChat = serverSocketChat.accept();
             socketMapChat.put(clientSocketChat.getInetAddress().getHostAddress(), clientSocketChat);
+
+            //Socket cho file
+            Socket clientSocketFile = serverTransFiles.accept();
+            socketMapFile.put(clientSocketFile.getInetAddress().getHostAddress(), clientSocketFile);
             //Truyen dia chi ve cho client nhan
             PrintWriter wr = new PrintWriter(clientSocket.getOutputStream(), true);
             wr.println(count);
@@ -59,8 +67,15 @@ public class MainServer {
     public ReceivePacket getReceivePacket(){
         return receivePacket;
     }
+    public ReceivePacket getReceivePacket1(){
+        return receivePacket1;
+    }
+
     public Map<String, Socket> getSocketMap(){
         return socketMap;
+    }
+    public Map<String, Socket> getSocketMapFile(){
+        return socketMapFile;
     }
     public Map<String, Socket> getSocketMapChat(){
         return socketMapChat;

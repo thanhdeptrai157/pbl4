@@ -1,30 +1,70 @@
-/* Sidebar with light blue background */
-.anchor-pane-sidebar {
-    -fx-background-color: #E0F7FA; /* Light blue */
+/* Toàn bộ giao diện */
+.main-pane {
+    -fx-background-color: #F0F4F8; /* Nền tổng thể màu nhạt */
 }
 
-/* Main layout with soft purple background */
-.anchor-pane-main {
-    -fx-background-color: #B39DDB; /* Soft purple */
+/* Sidebar */
+
+//.anchor-pane-sidebar {
+   // -fx-background-color: #263238; /* Sidebar màu tối */
+  //  -fx-padding: 20px; /* Khoảng cách padding để nút thoáng hơn */
+   // -fx-background-color: #032251;
+//}
+
+.pane-sidebar{
+    -fx-background-color: #032251;
 }
 
-/* Button styling with soft blue-to-purple gradient */
+
 .button {
-    -fx-background-color: linear-gradient(to bottom, #81D4FA, #9575CD); /* Light blue to soft purple */
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 3);
+    //-fx-text-fill: #FFFFFF; /* Màu chữ của nút là trắng */
+    //-fx-font-size: 16px;
+    //-fx-font-weight: bold;
+    //-fx-background-color: #455A64;
+   // -fx-background-radius: 5;
+   // -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 5, 0, 0, 2);
+
+
+     -fx-background-color: #FFFFFF;
+     -fx-text-fill: #0E81A0;
+     -fx-font-size: 14px;
+     -fx-font-weight: bold;
+     -fx-background-radius: 2;
+      -fx-border-color: transparent;
 }
 
-/* Button hover effect with darker blue-to-purple gradient */
 .button:hover {
-    -fx-background-color: linear-gradient(to bottom, #4FC3F7, #7E57C2); /* Slightly darker blue to purple */
+    //-fx-background-color: #546E7A;
+      -fx-background-color: linear-gradient(to bottom, #2563EB, #3B82F6); /* Darker blue gradient */
+            -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.4), 10, 0.5, 0, 5);
+            -fx-text-fill: white;
+            -fx-cursor: hand;
 }
 
-/* Button pressed effect with even darker gradient */
 .button:pressed {
-    -fx-background-color: linear-gradient(to bottom, #29B6F6, #673AB7); /* Darker blue to purple */
+    -fx-background-color: #37474F;
+}
+
+/* Main area background */
+//.anchor-pane-main {
+    //-fx-background-color: #FFFFFF;
+    //-fx-padding: 20px;
+   // -fx-border-color: #E0E0E0;
+   // -fx-border-width: 1;
+   // -fx-border-radius: 10;
+//}
+
+/* Label welcome message */
+.welcome-label {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #37474F; /* Chữ tối màu cho dễ nhìn */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+    -fx-alignment: center;
+}
+
+/* Áp dụng style cho toàn bộ nút bấm */
+.button {
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
 }
